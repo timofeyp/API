@@ -7,7 +7,7 @@ const port = 8000;
 app.use(bodyParser.urlencoded({ extended: true }));
 MongoClient.connect(db.url, { useNewUrlParser: true }, (err, database) => {
     if (err) return console.log(err)
-    require('./app/routes')(app, database);
+    require('./app/routes')(app, database.db('data'));
     app.listen(port, () => {
         console.log('We are live on ' + port);
     });
