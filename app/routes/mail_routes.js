@@ -1,23 +1,19 @@
-module.exports = function(app, db) {
+const { addressList } = require('../database/schemas/');
+
+module.exports = function(app) {
     app.post('/add-to-mail', (req, res) => {
-        const mail = { name: req.body.name, mail: req.body.mail };
-    db.collection('mail').insertOne(mail, (err, result) => {
-        if (err) {
-            res.send({ 'error': 'An error has occurred' });
-        } else {
-            res.send(result.ops[0]);
-}
-});
-});
-    app.post('/rm-from-mail', (req, res) => {
-        const mail = { name: req.body.name, mail: req.body.mail };
-        db.collection('mail').deleteOne(mail, (err, result) => {
+        const newAddress = addressList(req.body);
+        newAddress.save((err, address) => {
             if (err) {
-                res.send({ 'error': 'An error has occurred' });
+                res.status(400).send({message: 'Create todo failed', err});
             } else {
-                res.send(result.ops[0]);
+                res.send({message: 'Todo created successfully', newAddressList: address});
             }
-        });
+        })
     });
 
-};
+
+
+
+}
+
