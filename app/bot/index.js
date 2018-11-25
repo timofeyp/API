@@ -6,19 +6,23 @@ const userArrFromDb = []
 
 client.login(botCfg.token)
 
+pushUserArrFromDb = async ()=> {
+    await discordUserList.find(  (err, list)=> {
+        list.forEach( (user)=> {
+            userArrFromDb.push(
+                {
+                    discordId: user.discordId,
+                    name: user.name,
+                })
+        })
+    })
+}
+
 
 
 client.on('ready', () => {
     setInterval (function (){
-            discordUserList.find(  (err, list)=> {
-                list.forEach( (user)=> {
-                    userArrFromDb.push(
-                        {
-                            discordId: user.discordId,
-                            name: user.name,
-                        })
-                })
-            })
+        pushUserArrFromDb()
                 .then(()=>{
                     for (user of client.users){
                         if (user[1].bot || userArrFromDb.find(x => x.discordId === user[1].id)) continue
