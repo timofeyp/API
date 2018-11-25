@@ -1,7 +1,7 @@
 const addressList = require('./addressList');
-const discordUserList = require('./discordUserList');
+const discordUserListSchema = require('./discordUserList');
 
 module.exports = {
     addressList,
-    discordUserList
+    discordUserListSchema
 };

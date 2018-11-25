@@ -7,6 +7,6 @@ const discordUser= new Schema({
     discordId: { type: String, required: true, unique: true },
 });
 
-const discordUserList= mongoose.model('discordUserList', discordUser);
+const discordUserListSchema= mongoose.model('discordUserList', discordUser);
 
-module.exports = discordUserList;
+module.exports = discordUserListSchema;
