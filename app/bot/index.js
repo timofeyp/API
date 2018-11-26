@@ -2,7 +2,7 @@ const {token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns} = require
 const Discord             = require('discord.js')
 const { discordUserListSchema } = require('../database/schemas/')
 const client = new Discord.Client()
-const userArrFromDb = []
+let userArrFromDb = []
 
 client.login(token)
 
@@ -50,15 +50,21 @@ client.on('ready', () => {
 client.on('message', (message)=> {
     if(message.content == 'Привет') {
         message.reply('Это Я, привет')
-        console.log(message.author.id)
+        console.log(message.author)
         console.log(client.users.get('470327455283150869').send("HIHIHI"))
     }
 })
 
-setTimeout( () => {
+setInterval(  async () => {
     const d = new Date();
     if (d.getHours() == votingTimeHrs && d.getMinutes() == votingTimeMns) {
-        //Do some magic
-        console.log("123123")
+        console.log("1")
+        userArrFromDb = []
+        await   pullUserArrFromDb()
+        console.log("2")
+        console.log(userArrFromDb)
+        userArrFromDb.forEach((user) => {
+            client.users.get(user.discordId).send('HIHIHI')
+        })
     }
-}, 60000)
+}, 10000)
