@@ -1,5 +1,6 @@
 const {token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns} = require('../config/bot')
 const Discord             = require('discord.js')
+const schedule = require('node-schedule');
 const { discordUserListSchema } = require('../database/schemas/')
 const client = new Discord.Client()
 
@@ -20,18 +21,14 @@ const pullUserArrFromDb = new Promise (async (resolve)=> {
 })
 
 
-setInterval(  async () => {
-    const d = new Date();
-    if (d.getHours() == votingTimeHrs && d.getMinutes() == votingTimeMns) {
+
+schedule.scheduleJob('37 19 ? * 1-6', async ()=> {
         let arr = await  pullUserArrFromDb
         console.log(arr)
         arr.forEach((user) => {
             client.users.get(user.discordId).send('HIHIHI')
         })
-    }
-}, 10000)
-
-
+    })
 
 
 // client.on('message', (message)=> {
