@@ -20,13 +20,12 @@ const pullUserArrFromDb = new Promise (async (resolve)=> {
  resolve(userArrFromDb)
 })
 
-
-
-schedule.scheduleJob('37 19 ? * 1-6', async ()=> {
+schedule.scheduleJob('54 19 ? * 1-6', async ()=> {
         let arr = await  pullUserArrFromDb
         console.log(arr)
         arr.forEach((user) => {
-            client.users.get(user.discordId).send('HIHIHI')
+            (()=>setInterval(()=>console.log("3"),2000))()
+           // ((user)=> client.users.get(user.discordId).send('HIHIHI'))(user)
         })
     })
 
