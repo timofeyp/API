@@ -7,14 +7,15 @@ const report = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'discordUserList'
     },
-    report: { type: String, required: true },
-    date: { type: String, required: true, unique: true },
+    reportOne: [{ body: String, date: { type: Date, default: Date.now } }],
+    reportTwo: [{ body: String, date: { type: Date, default: Date.now } }],
+    reportThree: [{ body: String, date: { type: Date, default: Date.now } }],
     created: {
         type: Date,
         default: Date.now
     }
 });
 
-const reportList= mongoose.model('reportList', report);
+const reportListSchema= mongoose.model('reportList', report);
 
-module.exports = reportList;
+module.exports = reportListSchema;
