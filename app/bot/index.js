@@ -7,7 +7,7 @@ const client = new Discord.Client()
 client.login(token)
 
 
-const userArrFromDb = []
+// const userArrFromDb = []
 const requestUserFromDb = (conditions) => new Promise ((resolve) => {
     resolve(discordUserListSchema.find(conditions, (err, list) => list ).exec())
 })
@@ -27,8 +27,8 @@ requestUserFromDb({}).then(x=> console.log(x))
 
 const pullUserArrFromDb = () => new Promise (async (resolve)=> {
     let list = await requestUserFromDb
-    let userArrFromDb = []
     list.forEach((user)=> {
+        let userArrFromDb = []
         userArrFromDb.push(
             {
                 discordId: user.discordId,
@@ -40,7 +40,7 @@ const pullUserArrFromDb = () => new Promise (async (resolve)=> {
  resolve(userArrFromDb)
 })
 
-
+///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
         client.users.get(user.discordId).send('HIHIHI')
@@ -57,11 +57,15 @@ const processArray = async (arr)=> {
         await awaitPollUser(item)
     }
 }
-schedule.scheduleJob('48 14 ? * 1-6', async ()=> {
+
+schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
     let arr = await  pullUserArrFromDb({})
     console.log(arr)
     processArray(arr)
 })
+
+
+///////MESSAGE TREATMENT
 
 client.on('message', async (message)=> {
    // let user = userArrFromDb.find(user => user.discordId === message.author.id)
@@ -79,8 +83,12 @@ client.on('message', async (message)=> {
         }
         await rmUserFromDb(userRm)
         break;
-    case 5:
-        console.log(5)
+    case '!srv':
+        console.log("SRV!")
+            let arr = await  pullUserArrFromDb({})
+            console.log(arr)
+            processArray(arr)
+
         break;
     default:
         console.log("DEFAULT!")
