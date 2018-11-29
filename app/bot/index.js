@@ -7,7 +7,7 @@ const client = new Discord.Client()
 client.login(token)
 
 
-// const userArrFromDb = []
+const userArrFromDb = []
 const requestUserFromDb = (conditions) => new Promise ((resolve) => {
     resolve(discordUserListSchema.find(conditions, (err, list) => list ).exec())
 })
@@ -26,16 +26,14 @@ const rmUserFromDb = (conditions) => new Promise ((resolve) => {
 requestUserFromDb({}).then(x=> console.log(x))
 
 const pullUserArrFromDb = () => new Promise (async (resolve)=> {
-    let list = await requestUserFromDb
+    let list = await requestUserFromDb()
     list.forEach((user)=> {
-        let userArrFromDb = []
         userArrFromDb.push(
             {
                 discordId: user.discordId,
                 name: user.name,
 
             })
-        console.log("111111")
     })
  resolve(userArrFromDb)
 })
@@ -60,7 +58,6 @@ const processArray = async (arr)=> {
 
 schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
     let arr = await  pullUserArrFromDb({})
-    console.log(arr)
     processArray(arr)
 })
 
