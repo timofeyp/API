@@ -2,28 +2,17 @@ const {token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns} = require
 const Discord             = require('discord.js')
 const schedule = require('node-schedule')
 const { discordUserListSchema,reportListSchema } = require('../database/schemas/')
+const dbRqst = require('../database/requests')
 const client = new Discord.Client()
+
+
     ///////////////// LOGIN
 client.login(token)
 
 
 const userArrFromDb = []
-const requestUserFromDb = (conditions) => new Promise ((resolve) => {
-    resolve(discordUserListSchema.find(conditions, (err, list) => list ).exec())
-})
-
-const pushUserToDb = (conditions) => new Promise ((resolve) => {
-    let newUser = discordUserListSchema(conditions)
-    resolve(newUser.save(conditions, (err, list) =>{ if (err) {console.log(err)} else list} ))
-})
-
-const rmUserFromDb = (conditions) => new Promise ((resolve) => {
-    resolve(discordUserListSchema.findOneAndRemove(conditions, (err, list) =>{ if (err) {console.log(err)} else list}).exec())
-})
-
-
 const pullUserArrFromDb = () => new Promise (async (resolve)=> {
-    let userList = await requestUserFromDb()
+    let userList = await rqst.pullFromDb(discordUserListSchema, {})
     userList.forEach((user)=> {
         userArrFromDb.push(
             {
@@ -78,18 +67,22 @@ client.on('message', async (message)=> {
             discordId: message.author.id,
             name: message.author.username
         }
-        await pushUserToDb(userAdd)
+        await dbRqst.pushToDb(discordUserListSchema, userAdd)
         break
     case '!stop':
         let userRm = {
             discordId: message.author.id
         }
-        await rmUserFromDb(userRm)
+        await dbRqst.rmFromDb(discordUserListSchema, userRm)
         break
     case '!srv':
         console.log("SRV!")
             let arr = await  pullUserArrFromDb({})
             processArray(arr)
+        let rq = await dbRqst.pullFromDb(discordUserListSchema,  {
+            discordId: message.author.id
+        })
+              console.log(rq)
         break
     default:
         switch (userArrFromDb) {
