@@ -10,6 +10,17 @@ const client = new Discord.Client()
 client.login(token)
 
 
+
+
+
+const pollUserVoteOne = () => new Promise ((resolve)=> {
+
+})
+
+
+
+///////SCHEDULE JOB
+
 const userArrFromDb = []
 const pullUserArrFromDb = () => new Promise (async (resolve)=> {
     let userList = await rqst.pullFromDb(discordUserListSchema, {})
@@ -23,17 +34,8 @@ const pullUserArrFromDb = () => new Promise (async (resolve)=> {
                 voteThree: {answer: false, response:false }
             })
     })
- resolve(userArrFromDb)
+    resolve(userArrFromDb)
 })
-
-
-const pollUserVoteOne = () => new Promise ((resolve)=> {
-
-})
-
-
-
-///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
         client.users.get(user.discordId).send('HIHIHI')
@@ -75,14 +77,16 @@ client.on('message', async (message)=> {
         }
         await dbRqst.rmFromDb(discordUserListSchema, userRm)
         break
-    case '!srv':
-        console.log("SRV!")
-            let arr = await  pullUserArrFromDb({})
-            processArray(arr)
+    case 'srv':
         let rq = await dbRqst.pullFromDb(discordUserListSchema,  {
             discordId: message.author.id
         })
-              console.log(rq)
+        let mes = {
+            author: rq[0].id,
+            reportOne: {body: message.content}
+        }
+        dbRqst.pushToDb(reportListSchema,  mes)
+              console.log(mes)
         break
     default:
         switch (userArrFromDb) {
