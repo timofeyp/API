@@ -10,41 +10,14 @@ const client = new Discord.Client()
 client.login(token)
 
 
-
-
-
-const pollUserVoteOne = () => new Promise ((resolve)=> {
-
-})
-
-
-
 ///////SCHEDULE JOB
 
-const userArrFromDb = []
-const pullUserArrFromDb = () => new Promise (async (resolve)=> {
-    let userList = await rqst.pullFromDb(discordUserListSchema, {})
-    userList.forEach((user)=> {
-        userArrFromDb.push(
-            {
-                discordId: user.discordId,
-                name: user.name,
-                voteOne: {answer: false, response:false },
-                voteTwo: {answer: false, response:false },
-                voteThree: {answer: false, response:false }
-            })
-    })
-    resolve(userArrFromDb)
-})
-
 const pollUser = (user) => new Promise(resolve=>{
-        client.users.get(user.discordId).send('HIHIHI')
-        resolve()
+        resolve(client.users.get(user.discordId).send('HIHIHI'))
 })
 
 const awaitPollUser = async (item) => {
     await pollUser(item)
-    console.log(item)
 }
 
 const processArray = async (arr)=> {
@@ -54,7 +27,7 @@ const processArray = async (arr)=> {
 }
 
 schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
-    let arr = await  pullUserArrFromDb({})
+    let arr = await  dbRqst.pullFromDb(discordUserListSchema, {})
     processArray(arr)
 })
 
@@ -62,7 +35,8 @@ schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
 ///////MESSAGE TREATMENT
 
 client.on('message', async (message)=> {
-    let user = userArrFromDb.find(user => user.discordId === message.author.id)
+    let userArr = await dbRqst.pullFromDb(discordUserListSchema, {})
+    console.log(userArr.find(user => user.discordId === message.author.id))
     switch (message.content) {
     case '!start':
         let userAdd = {
@@ -78,22 +52,22 @@ client.on('message', async (message)=> {
         await dbRqst.rmFromDb(discordUserListSchema, userRm)
         break
     case 'srv':
-        let rq = await dbRqst.pullFromDb(discordUserListSchema,  {
-            discordId: message.author.id
-        })
-        let mes = {
-            author: rq[0].id,
-            reportOne: {body: message.content}
-        }
-        dbRqst.pushToDb(reportListSchema,  mes)
-              console.log(mes)
+    
+        let arr = await  dbRqst.pullFromDb(discordUserListSchema, {})
+        processArray(arr)
+        
+        // let rq = await dbRqst.pullFromDb(discordUserListSchema,  {
+        //     discordId: message.author.id
+        // })
+        // let mes = {
+        //     author: rq[0].id,
+        //     reportOne: {body: message.content}
+        // }
+        // dbRqst.pushToDb(reportListSchema,  mes)
+        //       console.log(mes)
         break
     default:
-        switch (userArrFromDb) {
-            case (userArrFromDb): {
-                break
-            }
-        }
+        break
 }
 })
 

@@ -10,6 +10,9 @@ const report = new Schema({
     reportOne: [{ body: String, date: { type: Date, default: Date.now } }],
     reportTwo: [{ body: String, date: { type: Date, default: Date.now } }],
     reportThree: [{ body: String, date: { type: Date, default: Date.now } }],
+    questionOne: { type: Boolean, default: false},
+    questionTwo: { type: Boolean, default: false},
+    questionThree: { type: Boolean, default: false},
     created: {
         type: Date,
         default: Date.now
