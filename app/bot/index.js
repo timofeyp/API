@@ -13,6 +13,7 @@ client.login(token)
 ///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
+        sendQuestionOne()
         resolve(client.users.get(user.discordId).send('HIHIHI'))
 })
 
@@ -33,6 +34,21 @@ schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
 
 
 ///////MESSAGE TREATMENT
+
+sendMessage = (userId, message) => new Promise ((resolve) => {
+        resolve(client.users.get(userId).send(message))
+    })
+
+sendQuestionOne = (userId, discordUserId) => new Promise(async (resolve) => {
+    await sendMessage(discordUserId, 'Вопрос 1. Это вопрос один. А почему сейчас вопрос один?')
+    let report = {
+        author: userId,
+        questionOne: true
+    }
+    await dbRqst.pushToDb(reportListSchema,  report)
+    resolve()
+})
+
 
 client.on('message', async (message)=> {
     if (message.author.id !== client.user.id) {
@@ -65,9 +81,22 @@ client.on('message', async (message)=> {
             //       console.log(mes)
             break
         default:
-          //  let user= await dbRqst.findOneFromDb(discordUserListSchema, { day: { $lt: Date.now() } })
-            let reportList = await dbRqst.pullFromDb(reportListSchema, { created: { $lt: Date.now() } })
-            console.log(reportList)
+            let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
+            if (user.length) {
+                let reportList = await dbRqst.pullFromDb(reportListSchema, { created: { $lt: Date.now() } }, {author: user[0]._id})
+                console.log(reportList.length)
+                if (reportList.length === 0 ) {
+                        sendQuestionOne(user._id, message.author.id)
+                } else if (reportList.questionOne) {
+                
+                } else if (reportList.questionTwo) {
+    
+                } else if (reportList.questionThree) {
+    
+                }
+            } else {
+                break
+            }
     }
 }
 })
