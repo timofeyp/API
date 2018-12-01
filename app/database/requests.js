@@ -4,7 +4,14 @@ const dbRqst = {
             resolve(schema.find(conditions, (err, list) => list ).exec())
         })
     },
-
+    
+    findOneFromDb(schema, conditions) {
+        return new Promise ((resolve) => {
+            resolve(schema.findOne(conditions, (err, list) => list ).exec())
+        })
+    },
+    
+    
     pushToDb(schema, conditions) {
         return new Promise ((resolve) => {
             let newUser = schema(conditions)

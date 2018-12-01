@@ -7,9 +7,9 @@ const report = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'discordUserList'
     },
-    reportOne: [{ body: String, date: { type: Date, default: Date.now } }],
-    reportTwo: [{ body: String, date: { type: Date, default: Date.now } }],
-    reportThree: [{ body: String, date: { type: Date, default: Date.now } }],
+    reportOne: { body: String, date: { type: Date, default: Date.now } },
+    reportTwo: { body: String, date: { type: Date, default: Date.now } },
+    reportThree: { body: String, date: { type: Date, default: Date.now } },
     questionOne: { type: Boolean, default: false},
     questionTwo: { type: Boolean, default: false},
     questionThree: { type: Boolean, default: false},
