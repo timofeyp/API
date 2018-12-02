@@ -13,8 +13,8 @@ client.login(token)
 ///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
-        sendQuestionOne()
-        resolve(client.users.get(user.discordId).send('HIHIHI'))
+        resolve(sendQuestionOne(user._id, user.discordId))
+    
 })
 
 const awaitPollUser = async (item) => {
@@ -41,13 +41,34 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
 
 sendQuestionOne = (userId, discordUserId) => new Promise(async (resolve) => {
     await sendMessage(discordUserId, 'Вопрос 1. Это вопрос один. А почему сейчас вопрос один?')
-    let report = {
-        author: userId,
-        questionOne: true
-    }
+    let report = {$addToSet: {questionsDone: {body: '123'}}, author: userId}
     await dbRqst.pushToDb(reportListSchema,  report)
     resolve()
 })
+
+sendQuestionTwo = (userId, discordUserId) => new Promise(async (resolve) => {
+    console.log(userId, discordUserId)
+    await sendMessage(discordUserId, 'Вопрос 2. А это уже вопрос 2. И почему вопрос два?')
+    let conditions = ({ created: { $lt: Date.now() } }, {author: userId})
+    let report = {
+        questions: true
+    }
+    await dbRqst.findOneAndUpdate(reportListSchema, conditions, report)
+    resolve()
+})
+
+sendQuestionThree = (userId, discordUserId) => new Promise(async (resolve) => {
+    console.log(userId, discordUserId)
+    await sendMessage(discordUserId, 'Вопрос 3. Неужели три?')
+    let conditions = ({ created: { $lt: Date.now() } }, {author: userId})
+    let report = {
+        questions: true
+    }
+    await dbRqst.findOneAndUpdate(reportListSchema, conditions, report)
+    resolve()
+})
+
+
 
 
 client.on('message', async (message)=> {
@@ -69,30 +90,23 @@ client.on('message', async (message)=> {
         case 'srv':
             let arr = await dbRqst.pullFromDb(discordUserListSchema, {})
             processArray(arr)
-        
-            // let rq = await dbRqst.pullFromDb(discordUserListSchema,  {
-            //     discordId: message.author.id
-            // })
-            // let mes = {
-            //     author: rq[0].id,
-            //     reportOne: {body: message.content}
-            // }
-            // dbRqst.pushToDb(reportListSchema,  mes)
-            //       console.log(mes)
             break
         default:
             let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
+            console.log(user[0]._id)
             if (user.length) {
-                let reportList = await dbRqst.pullFromDb(reportListSchema, { created: { $lt: Date.now() } }, {author: user[0]._id})
-                console.log(reportList.length)
+                let conditions = { created: { $lt: Date.now() }, author: user[0]._id}
+                let reportList = await dbRqst.pullFromDb(reportListSchema, conditions)
+               // console.log(reportList)
                 if (reportList.length === 0 ) {
-                        sendQuestionOne(user._id, message.author.id)
-                } else if (reportList.questionOne) {
-                
-                } else if (reportList.questionTwo) {
-    
-                } else if (reportList.questionThree) {
-    
+                        sendQuestionOne(user[0]._id, message.author.id)
+                } else if (reportList[0].questionOne) {
+                        console.log("asdas")
+                        sendQuestionTwo(user[0]._id, message.author.id)
+                } else if (reportList[0].questionTwo) {
+                        sendQuestionThree(user[0]._id, message.author.id)
+                } else if (reportList[0].questionThree) {
+                    break
                 }
             } else {
                 break

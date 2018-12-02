@@ -5,14 +5,11 @@ const { Schema } = mongoose;
 const report = new Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'discordUserList'
+        ref: 'discordUserList',
+        required: true
     },
-    reportOne: { body: String, date: { type: Date, default: Date.now } },
-    reportTwo: { body: String, date: { type: Date, default: Date.now } },
-    reportThree: { body: String, date: { type: Date, default: Date.now } },
-    questionOne: { type: Boolean, default: false},
-    questionTwo: { type: Boolean, default: false},
-    questionThree: { type: Boolean, default: false},
+    reports: [{ body: {type: String}, date: { type: Date, default: Date.now } }],
+    questionsDone: [{ body: Object, date: { type: Date, default: Date.now } }],
     created: {
         type: Date,
         default: Date.now
