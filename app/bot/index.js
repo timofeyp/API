@@ -41,7 +41,7 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
 
 sendQuestionOne = (userId, discordUserId) => new Promise(async (resolve) => {
     await sendMessage(discordUserId, 'Вопрос 1. Это вопрос один. А почему сейчас вопрос один?')
-    let report = {$addToSet: {questionsDone: {body: '123'}}, author: userId}
+    let report = {$addToSet: {questionsDone: {1: {done: true, date: Date.now()}}}, author: userId}
     await dbRqst.pushToDb(reportListSchema,  report)
     resolve()
 })
