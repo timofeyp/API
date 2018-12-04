@@ -41,7 +41,7 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
 
 sendQuestionOne = (userId, discordUserId) => new Promise(async (resolve) => {
     await sendMessage(discordUserId, 'Вопрос 1. Это вопрос один. А почему сейчас вопрос один?')
-    let report = {$addToSet: {questionsDone: {questionId: 1, done: true, date: new Date()}}, author: userId, created: new Date()}
+    let report = {$addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}}, author: userId, created: new Date()}
     await dbRqst.pushToDb(reportListSchema,  report)
     resolve()
 })
@@ -98,31 +98,35 @@ client.on('message', async (message)=> {
             if (user.length) {
                 let conditions = { created: { $lt: Date.now() }, author: user[0]._id}
                 let reportList = await dbRqst.pullFromDb(reportListSchema, conditions)
-                console.log(reportList)
+                console.log(reportList + " - reportList")
     
-                let getQuestions = () => {
-                    return reportList[0].questionsDone.map(q => {
-                        if (q.done) {
-                            return q.questionId
+                let getQuestionsDone = () => {
+                    if (reportList.length === 0 ) {
+                        return [0]
+                    } else {
+                        return reportList[0].questionsDone.map(q => {
+                            if (q.done) {
+                                return q.questionNum
+                            }
+                        })
                     }
-                    });
                 }
                 let getMinQuestion = () => {
-                    return Math.min(...getQuestions());
+                    return Math.min(...getQuestionsDone());
                 }
 
                 let promiseQuestion = () => new Promise ((resolve)=> {
                     resolve(getMinQuestion())
                 })
 
-                await console.log(promiseQuestion())
-                let minQuestion = Math.min.apply(null, promiseQuestion)
+                let minimumQuestionDone = await promiseQuestion()
+    
+                console.log(minimumQuestionDone)
                 
-               // console.log(reportList)
                 if (reportList.length === 0 ) {
                         sendQuestionOne(user[0]._id, message.author.id)
                 } else if (reportList[0].questionOne) {
-                        console.log("asdas")
+                    
                         sendQuestionTwo(user[0]._id, message.author.id)
                 } else if (reportList[0].questionTwo) {
                         sendQuestionThree(user[0]._id, message.author.id)
