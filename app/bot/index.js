@@ -41,42 +41,31 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
     })
 
 sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
-    let questionText = await dbRqst.findOne(questionsListSchema, {num: questionNum})
+    console.log("question")
+    let question= await dbRqst.findOne(questionsListSchema, {num: questionNum})
 
-    console.log(questionText)
-    await sendMessage(discordUserId, questionText)
-    if (questionText === 1) {
+    console.log(question)
+    await sendMessage(discordUserId, question.text)
+    if (question.num === 1) {
         let update = {
             $addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}},
             author: userId,
             created: new Date()
         }
         await dbRqst.updateOne(reportListSchema, {}, update, {upsert: true})
-    } else {
-
+    } else if (questionNum > 1) {
+        let today = moment().startOf('day')
+        let tomorrow = moment(today).endOf('day')
+        let conditions = {  created: {
+                $gte: today.toDate(),
+                $lt: tomorrow.toDate()
+            }, author: userId}
+            
+        let update = {
+            $addToSet: {questionsDone: {questionNum: questionNum, done: true, date: new Date()}},
+        }
+        await dbRqst.updateOne(reportListSchema, conditions, update)
     }
-    resolve()
-})
-
-sendQuestionTwo = (userId, discordUserId) => new Promise(async (resolve) => {
-    console.log(userId, discordUserId)
-    await sendMessage(discordUserId, 'Вопрос 2. А это уже вопрос 2. И почему вопрос два?')
-    let conditions = ({ created: { $lt: Date.now() } }, {author: userId})
-    let report = {
-        questionsDone: {$push: {questionId: 2, done: true, date: new Date()}}
-    }
-    await dbRqst.findOneAndUpdate(reportListSchema, conditions, report)
-    resolve()
-})
-
-sendQuestionThree = (userId, discordUserId) => new Promise(async (resolve) => {
-    console.log(userId, discordUserId)
-    await sendMessage(discordUserId, 'Вопрос 3. Неужели три?')
-    let conditions = ({ created: { $lt: Date.now() } }, {author: userId})
-    let report = {
-        questions: true
-    }
-    await dbRqst.findOneAndUpdate(reportListSchema, conditions, report)
     resolve()
 })
 
@@ -100,8 +89,9 @@ client.on('message', async (message)=> {
             await dbRqst.findOneAndRemove(discordUserListSchema, userRm)
             break
         case 'srv':
-            let arr = await dbRqst.pullFromDb(discordUserListSchema, {})
-            processArray(arr)
+            questionsListSchema.updateOne({num: 2}, {num: 4, text: 'Это вопроссссс'}, {upsert: true}, (err, list) => console.log(err))
+            console.log("X")
+         //   discordUserListSchema.findOne({name: 'timofeyp'}, (err, list) => list ).exec()
             break
         default:
             let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
@@ -116,14 +106,15 @@ client.on('message', async (message)=> {
                     }, author: user[0]._id}
 
                 let reportList = await dbRqst.findOne(reportListSchema, conditions)
+                
               //  console.log(reportList + " - reportList")
 
                 if (reportList === null ) {
                         sendQuestion(user[0]._id, message.author.id, 1)
                 } else  {
-                    console.log("get null")
+                    console.log(reportList + " - reportList")
                     let getQuestionsDone = () => {
-                            return reportList[0].questionsDone.map(q => {
+                            return reportList.questionsDone.map(q => {
                                 if (q.done) {
                                     return q.questionNum
                                 } else {

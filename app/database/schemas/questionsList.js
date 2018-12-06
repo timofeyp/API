@@ -5,10 +5,12 @@ const { Schema } = mongoose;
 const question = new Schema({
     num: {
         type: Number,
-        required: true
+        required: true,
+        unique: true
+        
     },
     text: {
-        type: Number,
+        type: String,
         required: true
     }
 });
