@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const questions = new Schema({
+const question = new Schema({
     num: {
         type: Number,
         required: true
@@ -13,6 +13,6 @@ const questions = new Schema({
     }
 });
 
-const questionsList = mongoose.model('questionsList', questions);
+const questionsListSchema = mongoose.model('questionsList', question);
 
-module.exports = questionsList;
+module.exports = questionsListSchema;

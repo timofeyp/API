@@ -1,7 +1,8 @@
+const moment = require('moment')
 const {token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns} = require('../config/bot')
 const Discord             = require('discord.js')
 const schedule = require('node-schedule')
-const { discordUserListSchema,reportListSchema } = require('../database/schemas/')
+const { discordUserListSchema, reportListSchema, questionsListSchema } = require('../database/schemas/')
 const dbRqst = require('../database/requests')
 const client = new Discord.Client()
 
@@ -39,10 +40,21 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
         resolve(client.users.get(userId).send(message))
     })
 
-sendQuestionOne = (userId, discordUserId) => new Promise(async (resolve) => {
-    await sendMessage(discordUserId, 'Вопрос 1. Это вопрос один. А почему сейчас вопрос один?')
-    let report = {$addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}}, author: userId, created: new Date()}
-    await dbRqst.pushToDb(reportListSchema,  report)
+sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
+    let questionText = await dbRqst.findOne(questionsListSchema, {num: questionNum})
+
+    console.log(questionText)
+    await sendMessage(discordUserId, questionText)
+    if (questionText === 1) {
+        let update = {
+            $addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}},
+            author: userId,
+            created: new Date()
+        }
+        await dbRqst.updateOne(reportListSchema, {}, update, {upsert: true})
+    } else {
+
+    }
     resolve()
 })
 
@@ -79,13 +91,13 @@ client.on('message', async (message)=> {
                 discordId: message.author.id,
                 name: message.author.username
             }
-            await dbRqst.pushToDb(discordUserListSchema, userAdd)
+            await dbRqst.updateOne(discordUserListSchema, userAdd)
             break
         case '!stop':
             let userRm = {
                 discordId: message.author.id
             }
-            await dbRqst.rmFromDb(discordUserListSchema, userRm)
+            await dbRqst.findOneAndRemove(discordUserListSchema, userRm)
             break
         case 'srv':
             let arr = await dbRqst.pullFromDb(discordUserListSchema, {})
@@ -93,44 +105,47 @@ client.on('message', async (message)=> {
             break
         default:
             let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
-            console.log(user[0]._id)
+           // console.log(user[0]._id)
             
             if (user.length) {
-                let conditions = { created: { $lt: Date.now() }, author: user[0]._id}
-                let reportList = await dbRqst.pullFromDb(reportListSchema, conditions)
-                console.log(reportList + " - reportList")
-    
-                let getQuestionsDone = () => {
-                    if (reportList.length === 0 ) {
-                        return [0]
-                    } else {
-                        return reportList[0].questionsDone.map(q => {
-                            if (q.done) {
-                                return q.questionNum
-                            }
-                        })
+                let today = moment().startOf('day')
+                let tomorrow = moment(today).endOf('day')
+                let conditions = {  created: {
+                        $gte: today.toDate(),
+                        $lt: tomorrow.toDate()
+                    }, author: user[0]._id}
+
+                let reportList = await dbRqst.findOne(reportListSchema, conditions)
+              //  console.log(reportList + " - reportList")
+
+                if (reportList === null ) {
+                        sendQuestion(user[0]._id, message.author.id, 1)
+                } else  {
+                    console.log("get null")
+                    let getQuestionsDone = () => {
+                            return reportList[0].questionsDone.map(q => {
+                                if (q.done) {
+                                    return q.questionNum
+                                } else {
+                                    return 0
+                                }
+                            })
                     }
-                }
-                let getMinQuestion = () => {
-                    return Math.min(...getQuestionsDone());
-                }
 
-                let promiseQuestion = () => new Promise ((resolve)=> {
-                    resolve(getMinQuestion())
-                })
+                    let getMinQuestion = () => {
+                        return Math.min(...getQuestionsDone());
+                    }
 
-                let minimumQuestionDone = await promiseQuestion()
-    
-                console.log(minimumQuestionDone)
-                
-                if (reportList.length === 0 ) {
-                        sendQuestionOne(user[0]._id, message.author.id)
-                } else if (reportList[0].questionOne) {
-                    
-                        sendQuestionTwo(user[0]._id, message.author.id)
-                } else if (reportList[0].questionTwo) {
-                        sendQuestionThree(user[0]._id, message.author.id)
-                } else if (reportList[0].questionThree) {
+                    let promiseMinQuestion = () => new Promise ((resolve)=> {
+                        resolve(getMinQuestion())
+                    })
+
+                    let nextQuestion = await promiseMinQuestion() + 1
+
+                    console.log(nextQuestion + "   NUM")
+
+                    await sendQuestion(user[0]._id, message.author.id, nextQuestion)
+
                     break
                 }
             } else {
