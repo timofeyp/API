@@ -14,7 +14,7 @@ client.on('error: ', console.error)
 ///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
-        resolve(sendQuestionOne(user._id, user.discordId))
+        resolve(sendQuestion(user._id, user.discordId, 1))
     
 })
 
@@ -24,11 +24,11 @@ const awaitPollUser = async (item) => {
 
 const processArray = async (arr)=> {
     for (const item of arr) {
-        await awaitPollUser(item)
+        await pollUser(item)
     }
 }
 
-schedule.scheduleJob('50 15 ? * 1-6', async ()=> {
+schedule.scheduleJob('02 19 ? * 1-6', async ()=> {
     let arr = await  dbRqst.pullFromDb(discordUserListSchema, {})
     processArray(arr)
 })
@@ -41,39 +41,26 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
     })
 
 sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
-    let question= await dbRqst.findOne(questionsListSchema, {num: questionNum})
-    await sendMessage(discordUserId, question.text)
-
-    if (question.num === 1) {
+    let question = await dbRqst.findOne(questionsListSchema, {num: questionNum})
+    console.log(question)
+    if (question) {
+        await sendMessage(discordUserId, question.text)
         let today = moment().startOf('day')
         let tomorrow = moment(today).endOf('day')
         let conditions = {  created: {
                 $gte: today.toDate(),
                 $lt: tomorrow.toDate()
             }, author: userId}
-        // let reportList = await dbRqst.findOne(reportListSchema, conditions)
-        // console.log(reportList)
         let update = {
-            $addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}},
+            $addToSet: {questionsDone: {questionNum: questionNum, done: true, date: new Date()}},
             author: userId,
             created: new Date()
         }
-
-       let upd = await dbRqst.updateOne(reportListSchema,conditions,update ,{ upsert: true} )
-
-    } else if (questionNum > 1) {
-        let today = moment().startOf('day')
-        let tomorrow = moment(today).endOf('day')
-        let conditions = {  created: {
-                $gte: today.toDate(),
-                $lt: tomorrow.toDate()
-            }, author: userId}
-            
-        let update = {
-            $addToSet: {questionsDone: {questionNum: questionNum, done: true, date: new Date()}},
-        }
-        await dbRqst.updateOne(reportListSchema, conditions, update)
+       await dbRqst.updateOne(reportListSchema,conditions,update ,{ upsert: true} )
+    } else if (question === null) {
+        await sendMessage(discordUserId, 'Опрос окончен')
     }
+    
     resolve()
 })
 
@@ -97,12 +84,9 @@ client.on('message', async (message)=> {
             await dbRqst.findOneAndRemove(discordUserListSchema, userRm)
             break
         case 'srv':
-
             break
         default:
             let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
-           // console.log(user[0]._id)
-            
             if (user.length) {
                 let today = moment().startOf('day')
                 let tomorrow = moment(today).endOf('day')
@@ -110,15 +94,11 @@ client.on('message', async (message)=> {
                         $gte: today.toDate(),
                         $lt: tomorrow.toDate()
                     }, author: user[0]._id}
-
                 let reportList = await dbRqst.findOne(reportListSchema, conditions)
-                
-                 console.log(reportList + " - reportList")
-
                 if (reportList === null  ) {
                         sendQuestion(user[0]._id, message.author.id, 1)
                 } else  {
-                    console.log(reportList + " - reportList1")
+
                     let getQuestionsDone = () => {
                             return reportList.questionsDone.map(q => {
                                 if (q.done) {
@@ -128,21 +108,18 @@ client.on('message', async (message)=> {
                                 }
                             })
                     }
-
                     let getMaxQuestionDone = () => {
                         return Math.max(...getQuestionsDone());
                     }
-
                     let promiseMaxQuestionDone = () => new Promise ((resolve)=> {
                         resolve(getMaxQuestionDone())
                     })
-
-                    let nextQuestion = await promiseMaxQuestionDone() + 1
-
-                    console.log(nextQuestion + "   NUM")
-
-                    await sendQuestion(user[0]._id, message.author.id, nextQuestion)
-
+                    let questionNum = await promiseMaxQuestionDone()
+                    await sendQuestion(user[0]._id, message.author.id, (questionNum + 1))
+                    let update = {
+                        $addToSet: {reports: {reportNum: questionNum, text: message.content}}
+                    }
+                    await dbRqst.updateOne(reportListSchema,conditions,update)
                     break
                 }
             } else {

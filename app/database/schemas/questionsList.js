@@ -5,9 +5,8 @@ const { Schema } = mongoose;
 const question = new Schema({
     num: {
         type: Number,
-        required: true,
-        unique: true
-        
+        unique: true,
+        required: true
     },
     text: {
         type: String,
