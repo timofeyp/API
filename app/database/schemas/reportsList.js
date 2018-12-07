@@ -9,7 +9,7 @@ const report = new Schema({
         required: true
     },
     reports: [{ body: {type: String}, date: { type: Date, default: Date.now } }],
-    questionsDone: Array,
+    questionsDone: [{ questionNum: {type: Number, unique: true}, done: {type: Boolean} ,date: { type: Date, default: Date.now } }],
     created: {
         type: Date,
         default: Date.now

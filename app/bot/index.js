@@ -9,7 +9,7 @@ const client = new Discord.Client()
 
     ///////////////// LOGIN
 client.login(token)
-
+client.on('error: ', console.error)
 
 ///////SCHEDULE JOB
 
@@ -41,18 +41,26 @@ sendMessage = (userId, message) => new Promise ((resolve) => {
     })
 
 sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
-    console.log("question")
     let question= await dbRqst.findOne(questionsListSchema, {num: questionNum})
-
-    console.log(question)
     await sendMessage(discordUserId, question.text)
+
     if (question.num === 1) {
+        let today = moment().startOf('day')
+        let tomorrow = moment(today).endOf('day')
+        let conditions = {  created: {
+                $gte: today.toDate(),
+                $lt: tomorrow.toDate()
+            }, author: userId}
+        // let reportList = await dbRqst.findOne(reportListSchema, conditions)
+        // console.log(reportList)
         let update = {
             $addToSet: {questionsDone: {questionNum: 1, done: true, date: new Date()}},
             author: userId,
             created: new Date()
         }
-        await dbRqst.updateOne(reportListSchema, {}, update, {upsert: true})
+
+       let upd = await dbRqst.updateOne(reportListSchema,conditions,update ,{ upsert: true} )
+
     } else if (questionNum > 1) {
         let today = moment().startOf('day')
         let tomorrow = moment(today).endOf('day')
@@ -89,9 +97,7 @@ client.on('message', async (message)=> {
             await dbRqst.findOneAndRemove(discordUserListSchema, userRm)
             break
         case 'srv':
-            questionsListSchema.updateOne({num: 2}, {num: 4, text: 'Это вопроссссс'}, {upsert: true}, (err, list) => console.log(err))
-            console.log("X")
-         //   discordUserListSchema.findOne({name: 'timofeyp'}, (err, list) => list ).exec()
+
             break
         default:
             let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
@@ -107,12 +113,12 @@ client.on('message', async (message)=> {
 
                 let reportList = await dbRqst.findOne(reportListSchema, conditions)
                 
-              //  console.log(reportList + " - reportList")
+                 console.log(reportList + " - reportList")
 
-                if (reportList === null ) {
+                if (reportList === null  ) {
                         sendQuestion(user[0]._id, message.author.id, 1)
                 } else  {
-                    console.log(reportList + " - reportList")
+                    console.log(reportList + " - reportList1")
                     let getQuestionsDone = () => {
                             return reportList.questionsDone.map(q => {
                                 if (q.done) {
@@ -123,15 +129,15 @@ client.on('message', async (message)=> {
                             })
                     }
 
-                    let getMinQuestion = () => {
-                        return Math.min(...getQuestionsDone());
+                    let getMaxQuestionDone = () => {
+                        return Math.max(...getQuestionsDone());
                     }
 
-                    let promiseMinQuestion = () => new Promise ((resolve)=> {
-                        resolve(getMinQuestion())
+                    let promiseMaxQuestionDone = () => new Promise ((resolve)=> {
+                        resolve(getMaxQuestionDone())
                     })
 
-                    let nextQuestion = await promiseMinQuestion() + 1
+                    let nextQuestion = await promiseMaxQuestionDone() + 1
 
                     console.log(nextQuestion + "   NUM")
 
