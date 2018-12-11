@@ -16,7 +16,7 @@ const report = new Schema({
     }
 }, { strict: false });
 
-report.index({ created: 1, questionNum: 1}, { unique: true })
+//report.index({ created: 1, questionNum: 1}, { unique: true })
 
 const reportListSchema= mongoose.model('reportList', report);
 
