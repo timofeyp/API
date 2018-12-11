@@ -3,7 +3,6 @@ const {token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns} = require
 const Discord             = require('discord.js')
 const schedule = require('node-schedule')
 const { discordUserListSchema, reportListSchema, questionsListSchema } = require('../database/schemas/')
-const dbRqst = require('../database/requests')
 const client = new Discord.Client()
 
 
@@ -11,16 +10,23 @@ const client = new Discord.Client()
 client.login(token)
 client.on('error: ', console.error)
 
+
+const todayCondition = () => {
+    let today = moment().startOf('day')
+    let tomorrow = moment(today).endOf('day')
+    return {
+        created: {
+            $gte: today.toDate(),
+            $lt: tomorrow.toDate()
+        }
+    }
+}
+
 ///////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(resolve=>{
         resolve(sendQuestion(user._id, user.discordId, 1))
-    
 })
-
-const awaitPollUser = async (item) => {
-    await pollUser(item)
-}
 
 const processArray = async (arr)=> {
     for (const item of arr) {
@@ -29,72 +35,65 @@ const processArray = async (arr)=> {
 }
 
 schedule.scheduleJob('02 19 ? * 1-6', async ()=> {
-    let arr = await  dbRqst.pullFromDb(discordUserListSchema, {})
+    let arr = await  discordUserListSchema.find({})
     processArray(arr)
 })
 
 
 ///////MESSAGE TREATMENT
 
-sendMessage = (userId, message) => new Promise ((resolve) => {
+const sendMessage = (userId, message) => new Promise ((resolve) => {
         resolve(client.users.get(userId).send(message))
     })
 
-sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
-    let question = await dbRqst.findOne(questionsListSchema, {num: questionNum})
+const sendQuestion = (userId, discordUserId, questionNum) => new Promise(async (resolve) => {
+    let question = await questionsListSchema.findOne({num: questionNum})
     console.log(question)
     if (question) {
         await sendMessage(discordUserId, question.text)
-        let today = moment().startOf('day')
-        let tomorrow = moment(today).endOf('day')
-        let conditions = {  created: {
-                $gte: today.toDate(),
-                $lt: tomorrow.toDate()
-            }, author: userId}
+        let conditions = {  ...todayCondition()
+            , author: userId}
         let update = {
             $addToSet: {questionsDone: {questionNum: questionNum, done: true, date: new Date()}},
             author: userId,
             created: new Date()
         }
-       await dbRqst.updateOne(reportListSchema,conditions,update ,{ upsert: true} )
+       await reportListSchema.updateOne(conditions,update ,{ upsert: true} )
     } else if (question === null) {
         await sendMessage(discordUserId, 'Опрос окончен')
     }
-    
+
     resolve()
 })
 
 
 
-
 client.on('message', async (message)=> {
     if (message.author.id !== client.user.id) {
-    switch (message.content) {
+        let userCondition = {discordId: message.author.id}
+        switch (message.content) {
         case '!start':
             let userAdd = {
                 discordId: message.author.id,
-                name: message.author.username
+                name: message.author.username,
+                subscribe: true
             }
-            await dbRqst.updateOne(discordUserListSchema, userAdd)
+            await discordUserListSchema.updateOne(userCondition, userAdd, {upsert: true})
             break
         case '!stop':
-            let userRm = {
-                discordId: message.author.id
-            }
-            await dbRqst.findOneAndRemove(discordUserListSchema, userRm)
+            await discordUserListSchema.findOneAndUpdate(userCondition, {subscribe: false})
             break
         case 'srv':
+            let arr = await  discordUserListSchema.find({subscribe: true})
+            console.log(arr)
             break
         default:
-            let user = await dbRqst.pullFromDb(discordUserListSchema,  {discordId: message.author.id})
-            if (user.length) {
-                let today = moment().startOf('day')
-                let tomorrow = moment(today).endOf('day')
-                let conditions = {  created: {
-                        $gte: today.toDate(),
-                        $lt: tomorrow.toDate()
-                    }, author: user[0]._id}
-                let reportList = await dbRqst.findOne(reportListSchema, conditions)
+            let user = await discordUserListSchema.find({discordId: message.author.id})
+            if (user.subscribe) {
+                let conditions = {
+                    ...todayCondition(),
+                    author: user[0]._id}
+                let reportList = await reportListSchema.findOne(conditions)
                 if (reportList === null  ) {
                         sendQuestion(user[0]._id, message.author.id, 1)
                 } else  {
@@ -119,7 +118,7 @@ client.on('message', async (message)=> {
                     let update = {
                         $addToSet: {reports: {reportNum: questionNum, text: message.content}}
                     }
-                    await dbRqst.updateOne(reportListSchema,conditions,update)
+                    await reportListSchema.updateOne(conditions,update)
                     break
                 }
             } else {
@@ -129,17 +128,6 @@ client.on('message', async (message)=> {
 }
 })
 
-
-// schedule.scheduleJob('17 13 ? * 1-6', async ()=> {
-// let userArr = await dbRqst.pullFromDb(discordUserListSchema, {})
-// console.log(userArr.find(user => user.discordId === message.author.id))
-//         let arr = await  pullUserArrFromDb
-//         console.log(arr)
-//         arr.forEach((user) => {
-//             (()=>setInterval(()=>console.log("3"),2000))()
-//            // ((user)=> client.users.get(user.discordId).send('HIHIHI'))(user)
-//         })
-//     })
 
 
 

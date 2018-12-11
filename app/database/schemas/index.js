@@ -1,7 +1,7 @@
-const addressList = require('./addressList');
-const discordUserListSchema = require('./discordUserList');
-const reportListSchema = require('./reportsList');
-const questionsListSchema = require('./questionsList')
+const addressList = require('./AddressList');
+const discordUserListSchema = require('./DiscordUserList');
+const reportListSchema = require('./ReportsList');
+const questionsListSchema = require('./AuestionsList')
 
 module.exports = {
     addressList,
