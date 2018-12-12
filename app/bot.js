@@ -1,10 +1,10 @@
 /* eslint-disable no-template-curly-in-string */
 const mongoose = require('mongoose')
 const moment = require('moment')
-const getSettings = require('../config/bot.js')
+const getSettings = require('./config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
-const { discordUserListSchema, reportListSchema, questionsListSchema } = require('../database/schemas/')
+const { discordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
 const client = new Discord.Client()
 
 mongoose.connection.on('connected', async () => {
@@ -16,8 +16,7 @@ mongoose.connection.on('connected', async () => {
 /// /////LOGIN
 
 client.on('error: ', console.error)
-    //
-    //
+
 const todayCondition = (botSettings) => {
   let today = moment().startOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
   let tomorrow = moment(today).add(1, 'day').endOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
