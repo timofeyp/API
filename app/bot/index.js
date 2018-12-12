@@ -51,15 +51,17 @@ const sendMessage = (userId, message) => new Promise((resolve) => {
   resolve(client.users.get(userId).send(message))
 })
 
-const sendQuestion = (userId, discordUserId, questionNum, reportList) => new Promise(async (resolve) => {
+const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   let question = await questionsListSchema.findOne({ num: questionNum })
   let questionCheckObj = await questionsCheck(reportList)
   console.log(questionCheckObj)
   if (question) {
     await sendMessage(discordUserId, question.text)
     if (questionCheckObj.questionDoneNum !== questionNum) {
-      let conditions = { ...todayCondition(),
-        author: userId }
+      let conditions = {
+        ...todayCondition(),
+        author: userId
+      }
       let update = {
         $addToSet: { questionsDone: { questionNum: questionNum, done: true, date: new Date() } },
         author: userId,
@@ -70,9 +72,7 @@ const sendQuestion = (userId, discordUserId, questionNum, reportList) => new Pro
   } else if (question === null) {
     await sendMessage(discordUserId, 'Опрос окончен')
   }
-
-  resolve()
-})
+}
 
 const questionsCheck = async (reportList) => {
   if (reportList) {
@@ -88,7 +88,6 @@ const questionsCheck = async (reportList) => {
     let getMaxQuestionDone = () => {
       return Math.max(...getQuestionsDone())
     }
-    console.log(...getQuestionsDone() + ' QUESTIONS DONE')
     let promiseMaxQuestionDone = () => new Promise((resolve) => {
       resolve(getMaxQuestionDone())
     })
@@ -101,21 +100,17 @@ const questionsCheck = async (reportList) => {
 }
 
 const reportsCheck = async (reportList) => {
-  console.log('reports check')
   if (reportList) {
     if (reportList.reports.length) {
       let getReportsDone = () => {
         return reportList.reports.map(q => q.reportNum)
       }
-
       let getMaxReportsDone = () => {
         return Math.max(...getReportsDone())
       }
-
       let promiseMaxReportsDone = () => new Promise((resolve) => {
         resolve(getMaxReportsDone())
       })
-
       let maxReportDone = await promiseMaxReportsDone()
       let questions = await questionsListSchema.find({})
       return { check: reportList.reports.length < questions.length, maxReportDone }
