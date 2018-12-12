@@ -8,7 +8,7 @@ const { discordUserListSchema, reportListSchema, questionsListSchema } = require
 const client = new Discord.Client()
 
 mongoose.connection.on('connected', async () => {
-  const botSettings = await getSettings()
+  let botSettings = await getSettings()
   client.login(botSettings.token)
   execNewSchedule(botSettings)
 })
@@ -16,10 +16,11 @@ mongoose.connection.on('connected', async () => {
 /// /////LOGIN
 
 client.on('error: ', console.error)
-
-const todayCondition = () => {
-  let today = moment().startOf('day')
-  let tomorrow = moment(today).endOf('day')
+    //
+    //
+const todayCondition = (botSettings) => {
+  let today = moment().startOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
+  let tomorrow = moment(today).add(1, 'day').endOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
   return {
     created: {
       $gte: today.toDate(),
@@ -31,8 +32,9 @@ const todayCondition = () => {
 /// ////SCHEDULE JOB
 
 const pollUser = (user) => new Promise(async (resolve) => {
+  let botSettings = await getSettings()
   let conditions = {
-    ...todayCondition(),
+    ...todayCondition(botSettings),
     author: user._id }
   let reportList = await reportListSchema.findOne(conditions)
   let reportsCheckObj = await reportsCheck(reportList)
@@ -69,10 +71,12 @@ const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   if (question) {
     await sendMessage(discordUserId, question.text)
     if (questionCheckObj.questionDoneNum !== questionNum) {
+      let botSettings = await getSettings()
       let conditions = {
-        ...todayCondition(),
+        ...todayCondition(botSettings),
         author: userId
       }
+      console.log(conditions)
       let update = {
         $addToSet: { questionsDone: { questionNum: questionNum, done: true, date: new Date() } },
         author: userId,
@@ -155,10 +159,13 @@ client.on('message', async (message) => {
       default:
         let user = await discordUserListSchema.findOne({ discordId: message.author.id })
         if (user.subscribe) {
+          let botSettings = await getSettings()
           let conditions = {
-            ...todayCondition(),
+            ...todayCondition(botSettings),
             author: user._id }
+            console.log(conditions)
           let reportList = await reportListSchema.findOne(conditions)
+            console.log(reportList)
           if (reportList === null) {
             sendQuestion(user._id, message.author.id, 1, reportList)
           } else {
