@@ -21,6 +21,6 @@ const settings = new Schema({
   }
 })
 
-const botSettingsSchema = mongoose.model('botSettings', settings)
+const botSettingsSchema = mongoose.model('settings', settings)
 
 module.exports = botSettingsSchema

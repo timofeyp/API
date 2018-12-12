@@ -1,7 +1,8 @@
 const { botSettingsSchema } = require('../database/schemas/')
 
 getSettings = async () => {
-  return await botSettingsSchema.findOne({})
+  const settings = await botSettingsSchema.findOne()
+  return settings
 }
 
-module.exports = getSettings()
+module.exports = getSettings
