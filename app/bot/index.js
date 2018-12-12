@@ -1,12 +1,22 @@
+/* eslint-disable no-template-curly-in-string */
+const mongoose = require('mongoose')
 const moment = require('moment')
-const { token, discordUserListUpdateTime, votingTimeHrs, votingTimeMns } = require('../config/bot')
+const bot = require('../config/bot.js')
+const bot1 = require('../config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
 const { discordUserListSchema, reportListSchema, questionsListSchema } = require('../database/schemas/')
 const client = new Discord.Client()
 
+
+mongoose.connection.on('connected', async () => {
+   // const botSettings = await bot1.getSettings()
+    console.log(bot1)
+})
+
+
 /// /////LOGIN
-client.login(token)
+client.login(bot.token)
 client.on('error: ', console.error)
 
 const todayCondition = () => {
@@ -40,7 +50,7 @@ const processArray = async (arr) => {
   }
 }
 
-schedule.scheduleJob('15 18 ? * 1-6', async () => {
+schedule.scheduleJob(bot.votingTimeMns.toString() + ' ' + bot.votingTimeHrs.toString() + ' ? * 1-6', async () => {
   let arr = await discordUserListSchema.find({ subscribe: true })
   processArray(arr)
 })
