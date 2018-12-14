@@ -1,6 +1,6 @@
 const { botSettingsSchema } = require('../database/schemas/')
 
-getSettings = async () => {
+const getSettings = async () => {
   const settings = await botSettingsSchema.findOne()
   return settings
 }

@@ -5,7 +5,8 @@ const { Schema } = mongoose
 const settings = new Schema({
   pollHours: {
     type: Number,
-    required: true
+    required: true,
+    validate: /^\d{1}/
   },
   pollMinutes: {
     type: Number,

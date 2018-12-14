@@ -49,14 +49,13 @@ const processArray = async (arr) => {
   }
 }
 
-const execNewSchedule = (botSettings) => {
-  console.log(botSettings)
+const execNewSchedule = async (botSettings) => {
   schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
     let arr = await discordUserListSchema.find({ subscribe: true })
     processArray(arr)
   })
 }
-
+module.exports = execNewSchedule
 /// ////MESSAGE TREATMENT
 
 const sendMessage = (userId, message) => new Promise((resolve) => {
