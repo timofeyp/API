@@ -9,6 +9,7 @@ const client = new Discord.Client()
 
 mongoose.connection.on('connected', async () => {
   let botSettings = await getSettings()
+  console.log(botSettings.token)
   client.login(botSettings.token)
   execNewSchedule(botSettings)
 })

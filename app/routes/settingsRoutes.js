@@ -18,7 +18,7 @@ module.exports = function (app) {
       [req.body.pollDaysOfWeek ? 'pollDaysOfWeek' : null]: req.body.pollDaysOfWeek,
       [req.body.token ? 'token' : null]: req.body.token
     }
-    await botSettingsSchema.updateOne({}, update, (err, settings) => {
+    await botSettingsSchema.updateOne({}, update, { runValidators: true }, (err, settings) => {
       if (err) {
         res.status(400).send({ message: 'Create mail address failed', err })
       } else {
