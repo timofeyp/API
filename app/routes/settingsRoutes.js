@@ -3,6 +3,7 @@ const execNewSchedule = require('../bot.js')
 
 module.exports = function (app) {
   app.get('/get-settings', (req, res) => {
+    console.log(req.body)
     botSettingsSchema.findOne({}, { _id: 0 }, (err, settings) => {
       if (err) {
         res.status(400).send({ message: 'Create mail address failed', err })
