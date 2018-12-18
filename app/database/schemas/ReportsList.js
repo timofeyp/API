@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const { Schema } = mongoose
 
-const report = new Schema({
+const Report = new Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'discordUserList',
@@ -16,6 +16,6 @@ const report = new Schema({
   }
 }, { strict: false })
 
-const reportListSchema = mongoose.model('reportList', report)
+const reportListSchema = mongoose.model('ReportList', Report)
 
 module.exports = reportListSchema

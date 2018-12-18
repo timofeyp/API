@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
 const addressList = new Schema({
-    name: { type: String, required: true },
-    mail: { type: String, required: true, unique: true },
-});
+  name: { type: String, required: true },
+  mail: { type: String, required: true, unique: true }
+})
 
-const address= mongoose.model('addresslist', addressList);
+const address = mongoose.model('addresslist', addressList)
 
-module.exports = address;
+module.exports = address

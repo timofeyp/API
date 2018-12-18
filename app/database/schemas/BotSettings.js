@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const { Schema } = mongoose
 
-const settings = new Schema({
+const Settings = new Schema({
   pollHours: {
     type: Number,
     required: true,
@@ -42,6 +42,6 @@ const settings = new Schema({
   }
 })
 
-const botSettingsSchema = mongoose.model('settings', settings)
+const botSettingsSchema = mongoose.model('Settings', Settings)
 
 module.exports = botSettingsSchema

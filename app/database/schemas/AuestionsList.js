@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const { Schema } = mongoose
 
-const question = new Schema({
+const Question = new Schema({
   num: {
     type: Number,
     unique: true,
@@ -14,6 +14,6 @@ const question = new Schema({
   }
 })
 
-const questionsListSchema = mongoose.model('questionsList', question)
+const questionsListSchema = mongoose.model('QuestionsList', Question)
 
 module.exports = questionsListSchema
