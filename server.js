@@ -7,6 +7,7 @@ const morgan = require('morgan')
 const port = 8090
 app.use(bodyParser.urlencoded({ extended: true })) // ДОБАВЛЯЕТ В HTTP ЗАПРОС ОБЪЕКТ
 // BODY
+app.use(bodyParser.json())
 
 require('./app/routes')(app)
 app.listen(port, () => {

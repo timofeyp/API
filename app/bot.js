@@ -163,6 +163,7 @@ client.on('message', async (message) => {
             ...todayCondition(botSettings),
             author: user._id }
           let reportList = await reportListSchema.findOne(conditions)
+            console.log(reportList)
           if (reportList === null) {
             sendQuestion(user._id, message.author.id, 1, reportList)
           } else {

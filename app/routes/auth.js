@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../database/schemas/AdminUserList')
 
 module.exports = function (app) {
-  app.post('/register', function (req, res) {
+  app.post('/auth/register', function (req, res) {
     if (!req.body.username || !req.body.password) {
       res.json({ success: false, msg: 'Please pass username and password.' })
     } else {
@@ -23,7 +23,8 @@ module.exports = function (app) {
     }
   })
 
-  app.post('/login', function (req, res) {
+  app.post('/api/login', function (req, res) {
+      console.log(req.body)
     User.findOne({
       username: req.body.username
     }, function (err, user) {

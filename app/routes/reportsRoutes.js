@@ -29,9 +29,9 @@ module.exports = (app) => {
   app.get('/get-reports-secure', passport.authenticate('jwt', { session: false }), function (req, res) {
     const token = getToken(req.headers)
     if (token) {
-      reportListSchema.find(function (err, books) {
+      reportListSchema.find(function (err, reports) {
         if (err) return next(err)
-        res.json(books)
+        res.json(reports)
       })
     } else {
       return res.status(403).send({ success: false, msg: 'Unauthorized.' })
