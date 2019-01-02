@@ -88,30 +88,31 @@ const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   }
 }
 
-const questionsCheck = async (reportList) => {
-  if (reportList) {
-    let getQuestionsDone = () => {
-      return reportList.questionsDone.map(q => {
-        if (q.done) {
-          return q.questionNum
-        } else {
-          return 0
-        }
-      })
-    }
-    let getMaxQuestionDone = () => {
-      return Math.max(...getQuestionsDone())
-    }
-    let promiseMaxQuestionDone = () => new Promise((resolve) => {
-      resolve(getMaxQuestionDone())
-    })
-    let questionDoneNum = await promiseMaxQuestionDone()
-    let questions = await questionsListSchema.find({})
-    return { check: questionDoneNum <= questions.length, questionDoneNum }
-  } else {
-    return { check: true, questionDoneNum: 0 }
-  }
-}
+// const questionsCheck = async (reportList) => {
+//   if (reportList) {
+//     let getQuestionsDone = () => {
+//       return reportList.questionsDone.map(q => {
+//         if (q.done) {
+//           return q.questionNum
+//         } else {
+//           return 0
+//         }
+//       })
+//     }
+//     let getMaxQuestionDone = () => {
+//       return Math.max(...getQuestionsDone())
+//     }
+//     let promiseMaxQuestionDone = () => new Promise((resolve) => {
+//       resolve(getMaxQuestionDone())
+//     })
+//     let questionDoneNum = await promiseMaxQuestionDone()
+//     let questions = await questionsListSchema.find({})
+//     console.log(questions.length)
+//     return { check: questionDoneNum <= questions.length, questionDoneNum }
+//   } else {
+//     return { check: true, questionDoneNum: 0 }
+//   }
+// }
 
 const reportsCheck = async (reportList) => {
   if (reportList) {
@@ -163,21 +164,19 @@ client.on('message', async (message) => {
             ...todayCondition(botSettings),
             author: user._id }
           let reportList = await reportListSchema.findOne(conditions)
-            console.log(reportList)
           if (reportList === null) {
             sendQuestion(user._id, message.author.id, 1, reportList)
           } else {
-            let questionsCheckObj = await questionsCheck(reportList)
-            console.log(questionsCheckObj)
-            if (questionsCheckObj.check) {
+            let reportsCheckObj = await reportsCheck(reportList)
+            if (reportsCheckObj.check) {
               let update = {
-                $addToSet: { reports: { reportNum: questionsCheckObj.questionDoneNum, text: message.content } }
+                $addToSet: { reports: { reportNum: reportsCheckObj.maxReportDone + 1, text: message.content } }
               }
               await reportListSchema.updateOne(conditions, update)
             } else {
               break
             }
-            await sendQuestion(user._id, message.author.id, (questionsCheckObj.questionDoneNum + 1), reportList)
+            await sendQuestion(user._id, message.author.id, (reportsCheckObj.maxReportDone + 2), reportList)
             break
           }
         } else {

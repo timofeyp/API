@@ -5,7 +5,7 @@ const { Schema } = mongoose
 const Report = new Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'discordUserList',
+    ref: 'DiscordUserList',
     required: true
   },
   reports: [{ reportNum: { type: Number }, text: { type: String }, date: { type: Date, default: Date.now } }],
