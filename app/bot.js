@@ -88,31 +88,31 @@ const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   }
 }
 
-// const questionsCheck = async (reportList) => {
-//   if (reportList) {
-//     let getQuestionsDone = () => {
-//       return reportList.questionsDone.map(q => {
-//         if (q.done) {
-//           return q.questionNum
-//         } else {
-//           return 0
-//         }
-//       })
-//     }
-//     let getMaxQuestionDone = () => {
-//       return Math.max(...getQuestionsDone())
-//     }
-//     let promiseMaxQuestionDone = () => new Promise((resolve) => {
-//       resolve(getMaxQuestionDone())
-//     })
-//     let questionDoneNum = await promiseMaxQuestionDone()
-//     let questions = await questionsListSchema.find({})
-//     console.log(questions.length)
-//     return { check: questionDoneNum <= questions.length, questionDoneNum }
-//   } else {
-//     return { check: true, questionDoneNum: 0 }
-//   }
-// }
+const questionsCheck = async (reportList) => {
+  if (reportList) {
+    let getQuestionsDone = () => {
+      return reportList.questionsDone.map(q => {
+        if (q.done) {
+          return q.questionNum
+        } else {
+          return 0
+        }
+      })
+    }
+    let getMaxQuestionDone = () => {
+      return Math.max(...getQuestionsDone())
+    }
+    let promiseMaxQuestionDone = () => new Promise((resolve) => {
+      resolve(getMaxQuestionDone())
+    })
+    let questionDoneNum = await promiseMaxQuestionDone()
+    let questions = await questionsListSchema.find({})
+    console.log(questions.length)
+    return { check: questionDoneNum <= questions.length, questionDoneNum }
+  } else {
+    return { check: true, questionDoneNum: 0 }
+  }
+}
 
 const reportsCheck = async (reportList) => {
   if (reportList) {
