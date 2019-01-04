@@ -4,7 +4,7 @@ const moment = require('moment')
 const getSettings = require('./config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
-const { discordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
+const { DiscordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
 const client = new Discord.Client()
 
 mongoose.connection.on('connected', async () => {
@@ -52,7 +52,7 @@ const processArray = async (arr) => {
 
 const execNewSchedule = async (botSettings) => {
   schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
-    let arr = await discordUserListSchema.find({ subscribe: true })
+    let arr = await DiscordUserListSchema.find({ subscribe: true })
     processArray(arr)
   })
 }
@@ -147,17 +147,17 @@ client.on('message', async (message) => {
           name: message.author.username,
           subscribe: true
         }
-        await discordUserListSchema.updateOne(userCondition, userAdd, { upsert: true })
+        await DiscordUserListSchema.updateOne(userCondition, userAdd, { upsert: true })
         break
       case '!stop':
-        await discordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
+        await DiscordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
         break
       case 'srv':
-        let arr = await discordUserListSchema.find({ subscribe: true })
+        let arr = await DiscordUserListSchema.find({ subscribe: true })
         processArray(arr)
         break
       default:
-        let user = await discordUserListSchema.findOne({ discordId: message.author.id })
+        let user = await DiscordUserListSchema.findOne({ discordId: message.author.id })
         if (user.subscribe) {
           let botSettings = await getSettings()
           let conditions = {
