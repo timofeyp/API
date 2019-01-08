@@ -1,5 +1,6 @@
 const dbUrl = require('../config/db')
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 mongoose.Promise = global.Promise
 mongoose.set('useCreateIndex', true)

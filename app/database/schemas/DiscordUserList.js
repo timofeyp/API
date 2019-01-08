@@ -9,6 +9,6 @@ const DiscordUser = new Schema({
   reports: [{ type: Schema.Types.ObjectId, ref: 'ReportList' }]
 })
 
-const discordUserListSchema = mongoose.model('DiscordUserList', DiscordUser)
+const DiscordUserListSchema = mongoose.model('DiscordUserList', DiscordUser)
 
-module.exports = discordUserListSchema
+module.exports = DiscordUserListSchema
