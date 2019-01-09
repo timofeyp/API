@@ -4,6 +4,19 @@ require('../config/passport/passport')(passport)
 const jwt = require('jsonwebtoken')
 const User = require('../database/schemas/AdminUserList')
 
+const getToken = function (headers) {
+  if (headers && headers.authorization) {
+    const parted = headers.authorization.split(' ')
+    if (parted.length === 2) {
+      return parted[1]
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
 module.exports = function (app) {
   app.post('/auth/register', function (req, res) {
     if (!req.body.username || !req.body.password) {
@@ -24,7 +37,7 @@ module.exports = function (app) {
   })
 
   app.post('/api/login', function (req, res) {
-      console.log(req.body)
+    console.log(req.body)
     User.findOne({
       username: req.body.username
     }, function (err, user) {
@@ -37,7 +50,7 @@ module.exports = function (app) {
         user.comparePassword(req.body.password, function (err, isMatch) {
           if (isMatch && !err) {
             // if user is found and password is right create a token
-            var token = jwt.sign(user.toJSON(), settings.secret)
+            let token = jwt.sign(user.toJSON(), settings.secret)
             // return the information including token as JSON
             res.json({ success: true, token: 'JWT ' + token })
           } else {
@@ -46,5 +59,13 @@ module.exports = function (app) {
         })
       }
     })
+  })
+  app.post('/api/login-by-jwt', passport.authenticate('jwt', { session: false }), (req, res) => {
+    const token = getToken(req.headers)
+    if (token) {
+      res.json({ success: true, token: 'JWT ' + token })
+    } else {
+      return res.status(403).send({ success: false, msg: 'Unauthorized.' })
+    }
   })
 }

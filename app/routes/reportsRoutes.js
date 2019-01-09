@@ -1,5 +1,5 @@
 const { reportListSchema } = require('../database/schemas/')
-var passport = require('passport')
+const passport = require('passport')
 require('../config/passport/passport')(passport)
 const moment = require('moment')
 const conditions = (conditions) => new Promise((resolve) => {
@@ -64,7 +64,7 @@ module.exports = (app) => {
       reportListSchema.paginate({
         ...conditionsObj
       }
-      , { page: req.body.page, limit: 1, populate: 'author', sort: { created: -1 } })
+      , { page: req.body.page, limit: 2, populate: 'author', sort: { created: -1 } })
         .then(reports => res.json(reports))
         .catch(err => res.status(400).send({ message: 'failed', err }))
     } else {
