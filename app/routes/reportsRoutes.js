@@ -1,20 +1,17 @@
 const { reportListSchema } = require('../database/schemas/')
 const passport = require('passport')
 require('../config/passport/passport')(passport)
-const moment = require('moment')
 const conditions = (conditions) => new Promise((resolve) => {
-  let startDate = moment().year(conditions.date.start.year).month(conditions.date.start.month).day(conditions.date.start.day).hour(0).minute(0).utcOffset(0, true)
-  let endDate = moment().year(conditions.date.end.year).month(conditions.date.end.month).day(conditions.date.end.day).hour(0).minute(0).utcOffset(0, true)
   resolve(conditions.authors ? {
-    authors: conditions.authors,
+    author: conditions.authors,
     created: {
-      $gte: startDate.toDate(),
-      $lt: endDate.toDate()
+      $gte: conditions.startDate,
+      $lt: conditions.endDate
     }
   } : {
     created: {
-      $gte: startDate.toDate(),
-      $lt: endDate.toDate()
+      $gte: conditions.startDate,
+      $lt: conditions.endDate
     }
   })
 })
@@ -64,7 +61,7 @@ module.exports = (app) => {
       reportListSchema.paginate({
         ...conditionsObj
       }
-      , { page: req.body.page, limit: 2, populate: 'author', sort: { created: -1 } })
+      , { page: req.body.page, limit: req.body.limit, populate: 'author', sort: { created: -1 } })
         .then(reports => res.json(reports))
         .catch(err => res.status(400).send({ message: 'failed', err }))
     } else {

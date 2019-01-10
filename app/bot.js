@@ -23,8 +23,8 @@ const todayCondition = (botSettings) => {
   let tomorrow = moment(today).add(1, 'day').endOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
   return {
     created: {
-      $gte: today.toDate(),
-      $lt: tomorrow.toDate()
+      $gte: today.utcOffset(0, true).toDate(),
+      $lt: tomorrow.utcOffset(0, true).toDate()
     }
   }
 }
