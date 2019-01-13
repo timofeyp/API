@@ -4,11 +4,13 @@ require('../config/passport/passport')(passport)
 const conditions = (conditions) => new Promise((resolve) => {
   resolve(conditions.authors ? {
     author: conditions.authors,
+    reports: { $ne: null },
     created: {
       $gte: conditions.startDate,
       $lt: conditions.endDate
     }
   } : {
+    reports: { $ne: null },
     created: {
       $gte: conditions.startDate,
       $lt: conditions.endDate
@@ -44,20 +46,7 @@ module.exports = (app) => {
     const token = getToken(req.headers)
     console.log(req.body)
     let conditionsObj = await conditions(req.body)
-    // const skip = { skip: parseInt(req.body.skip) }
-    // const limit = { limit: parseInt(req.body.limit) }
     if (token) {
-      // reportListSchema.find({}, null, { ...skip, ...limit }).populate('author').exec((err, reports) => {
-      //   if (err) return next(err)
-      //
-      //   let reportsWithAuthor = reports.map(report => ({
-      //     _id: report._id,
-      //     author: report.author.name,
-      //     created: report.created,
-      //     reports: report.reports
-      //   })
-      //   )
-      // res.json(reportsWithAuthor)
       reportListSchema.paginate({
         ...conditionsObj
       }

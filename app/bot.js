@@ -4,19 +4,38 @@ const moment = require('moment')
 const getSettings = require('./config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
-const { DiscordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
+const { DiscordUserListSchema, reportListSchema, questionsListSchema, botSettingsSchema } = require('./database/schemas')
 const client = new Discord.Client()
+const clientStatus = { onlineStatus: false }
+
 
 mongoose.connection.on('connected', async () => {
   let botSettings = await getSettings()
-  console.log(botSettings.token)
-  client.login(botSettings.token)
-  execNewSchedule(botSettings)
+  if (botSettings.token.length > 15) {
+    execNewSchedule(botSettings)
+  }
 })
 
-/// /////LOGIN
+const execNewSchedule = async (botSettings) => {
+  client.login(botSettings.token)
+    .then(() => {
+      clientStatus.onlineStatus = true
+    })
+    .catch()
 
+  schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
+    let arr = await DiscordUserListSchema.find({ subscribe: true })
+    processArray(arr)
+  })
+}
+module.exports = { execNewSchedule, clientStatus }
+
+/// /////LOGIN
 client.on('error: ', console.error)
+client.on('disconnect', () => {
+  clientStatus.onlineStatus = false
+})
+
 
 const todayCondition = (botSettings) => {
   let today = moment().startOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
@@ -50,13 +69,7 @@ const processArray = async (arr) => {
   }
 }
 
-const execNewSchedule = async (botSettings) => {
-  schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
-    let arr = await DiscordUserListSchema.find({ subscribe: true })
-    processArray(arr)
-  })
-}
-module.exports = execNewSchedule
+
 /// ////MESSAGE TREATMENT
 
 const sendMessage = (userId, message) => new Promise((resolve) => {
@@ -176,6 +189,7 @@ client.on('message', async (message) => {
             } else {
               break
             }
+            console.log(reportsCheckObj)
             await sendQuestion(user._id, message.author.id, (reportsCheckObj.maxReportDone + 2), reportList)
             break
           }

@@ -8,7 +8,7 @@ const Settings = new Schema({
     required: true,
     validate: {
       validator: (v) => {
-        return /^([1-9]|1[0-9]|2[0-4])$/.test(v)
+        return /^([0-9]|1[0-9]|2[0-3])$/.test(v)
       },
       message: props => `${props.value} is not a valid!`
     }
@@ -28,7 +28,7 @@ const Settings = new Schema({
     required: true,
     validate: {
       validator: (v) => {
-        return /^([0-7]|([0-7],){1,6}[0-7])$/.test(v)
+        return /^([0-7]|([0-7],){1,6}[0-7]|\s)$/.test(v)
       },
       message: props => `${props.value} is not a valid!`
     }
@@ -38,7 +38,6 @@ const Settings = new Schema({
     required: true,
     minlength: 10,
     maxlength: 60
-
   }
 })
 
