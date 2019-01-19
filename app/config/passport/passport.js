@@ -2,9 +2,8 @@ var JwtStrategy = require('passport-jwt').Strategy
 
 var ExtractJwt = require('passport-jwt').ExtractJwt
 
-// load up the user model
 var User = require('../../database/schemas/AdminUserList')
-var settings = require('./settings') // get settings file
+var settings = require('./settings')
 
 module.exports = function (passport) {
   var opts = {}

@@ -1,22 +1,23 @@
 /* eslint-disable no-template-curly-in-string */
 const mongoose = require('mongoose')
 const moment = require('moment')
-const getSettings = require('./config/bot.js')
+const { getSettings, initializeAuth } = require('./config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
 const { DiscordUserListSchema, reportListSchema, questionsListSchema, botSettingsSchema } = require('./database/schemas')
 const client = new Discord.Client()
 const clientStatus = { onlineStatus: false }
 
-
 mongoose.connection.on('connected', async () => {
   let botSettings = await getSettings()
   if (botSettings.token.length > 15) {
     execNewSchedule(botSettings)
   }
+  initializeAuth()
 })
 
 const execNewSchedule = async (botSettings) => {
+  console.log(botSettings)
   client.login(botSettings.token)
     .then(() => {
       clientStatus.onlineStatus = true
@@ -36,10 +37,9 @@ client.on('disconnect', () => {
   clientStatus.onlineStatus = false
 })
 
-
-const todayCondition = (botSettings) => {
-  let today = moment().startOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
-  let tomorrow = moment(today).add(1, 'day').endOf('day').hours(botSettings.pollHours).minutes(botSettings.pollMinutes)
+const todayCondition = () => {
+  let today = moment().startOf('day').hours(0).minutes(0)
+  let tomorrow = moment(today).add(1, 'day').endOf('day').hours(0).minutes(0)
   return {
     created: {
       $gte: today.utcOffset(0, true).toDate(),
@@ -57,7 +57,6 @@ const pollUser = (user) => new Promise(async (resolve) => {
     author: user._id }
   let reportList = await reportListSchema.findOne(conditions)
   let reportsCheckObj = await reportsCheck(reportList)
-  console.log(reportsCheckObj)
   if (reportsCheckObj.check) {
     resolve(sendQuestion(user._id, user.discordId, (reportsCheckObj.maxReportDone + 1), reportList))
   }
@@ -69,7 +68,6 @@ const processArray = async (arr) => {
   }
 }
 
-
 /// ////MESSAGE TREATMENT
 
 const sendMessage = (userId, message) => new Promise((resolve) => {
@@ -79,16 +77,13 @@ const sendMessage = (userId, message) => new Promise((resolve) => {
 const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   let question = await questionsListSchema.findOne({ num: questionNum })
   let questionCheckObj = await questionsCheck(reportList)
-  console.log(questionCheckObj)
   if (question) {
     await sendMessage(discordUserId, question.text)
     if (questionCheckObj.questionDoneNum !== questionNum) {
-      let botSettings = await getSettings()
       let conditions = {
-        ...todayCondition(botSettings),
+        ...todayCondition(),
         author: userId
       }
-      console.log(conditions)
       let update = {
         $addToSet: { questionsDone: { questionNum: questionNum, done: true, date: new Date() } },
         author: userId,
@@ -120,7 +115,6 @@ const questionsCheck = async (reportList) => {
     })
     let questionDoneNum = await promiseMaxQuestionDone()
     let questions = await questionsListSchema.find({})
-    console.log(questions.length)
     return { check: questionDoneNum <= questions.length, questionDoneNum }
   } else {
     return { check: true, questionDoneNum: 0 }
@@ -166,15 +160,12 @@ client.on('message', async (message) => {
         await DiscordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
         break
       case 'srv':
-        let arr = await DiscordUserListSchema.find({ subscribe: true })
-        processArray(arr)
         break
       default:
         let user = await DiscordUserListSchema.findOne({ discordId: message.author.id })
         if (user.subscribe) {
-          let botSettings = await getSettings()
           let conditions = {
-            ...todayCondition(botSettings),
+            ...todayCondition(),
             author: user._id }
           let reportList = await reportListSchema.findOne(conditions)
           if (reportList === null) {
@@ -189,7 +180,6 @@ client.on('message', async (message) => {
             } else {
               break
             }
-            console.log(reportsCheckObj)
             await sendQuestion(user._id, message.author.id, (reportsCheckObj.maxReportDone + 2), reportList)
             break
           }

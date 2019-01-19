@@ -1,11 +1,27 @@
-const { botSettingsSchema } = require('../database/schemas/')
+const { botSettingsSchema, AdminUserList } = require('../database/schemas/')
+const  botAuth  = require('./bot.json')
+
+const initializeAuth = async () => {
+  const authData = await AdminUserList.findOne()
+  if (!authData) {
+    var firstAdminUser = new AdminUserList({
+      username: botAuth.sysLogin,
+      password: botAuth.sysPass
+    })
+    await firstAdminUser.save({ username: botAuth.sysLogin, password: botAuth.sysPass })
+  }
+}
 
 const getSettings = async () => {
-  const settings = await botSettingsSchema.findOne()
+  let settings = await botSettingsSchema.findOne()
   if (!settings) {
-    await botSettingsSchema.updateOne({}, { pollHours: 0, pollMinutes: 0, pollDaysOfWeek: ' ', token: ' ' }, { upsert: true })
+    settings = await botSettingsSchema.findOneAndUpdate({}, { pollHours: 0, pollMinutes: 0, pollDaysOfWeek: ' ', token: botAuth.discordToken }, { upsert: true, returnNewDocument: true },
+      (err, documents) => {
+        settings = documents
+        return documents
+      })
   }
   return settings
 }
 
-module.exports = getSettings
+module.exports = { getSettings, initializeAuth }
