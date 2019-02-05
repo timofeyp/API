@@ -19,9 +19,6 @@ const Report = new Schema({
 }, { strict: false })
 Report.plugin(mongoosePaginate)
 
-
-
 const reportListSchema = mongoose.model('ReportList', Report)
-
 
 module.exports = reportListSchema

@@ -4,17 +4,21 @@ const moment = require('moment')
 const { getSettings, initializeAuth } = require('./config/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
-const { DiscordUserListSchema, reportListSchema, questionsListSchema, botSettingsSchema } = require('./database/schemas')
+const { DiscordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
 const client = new Discord.Client()
 const clientStatus = { onlineStatus: false }
 
 mongoose.connection.on('connected', async () => {
+  connectBot()
+})
+
+const connectBot = async () => {
   let botSettings = await getSettings()
   if (botSettings.token.length > 15) {
     execNewSchedule(botSettings)
   }
   initializeAuth()
-})
+}
 
 const execNewSchedule = async (botSettings) => {
   console.log(botSettings)
@@ -32,9 +36,14 @@ const execNewSchedule = async (botSettings) => {
 module.exports = { execNewSchedule, clientStatus }
 
 /// /////LOGIN
-client.on('error: ', console.error)
+client.on('error: ', (error) => console.log(error))
 client.on('disconnect', () => {
   clientStatus.onlineStatus = false
+  setInterval(() => {
+    do {
+      connectBot()
+    } while (clientStatus.onlineStatus)
+  }, 30000)
 })
 
 const todayCondition = () => {
@@ -160,6 +169,8 @@ client.on('message', async (message) => {
         await DiscordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
         break
       case 'srv':
+        let arr = await DiscordUserListSchema.find({ subscribe: true })
+        processArray(arr)
         break
       default:
         let user = await DiscordUserListSchema.findOne({ discordId: message.author.id })

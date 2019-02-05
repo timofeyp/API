@@ -5,6 +5,7 @@ const settingsRoutes = require('./settingsRoutes')
 const reportsRoutes = require('./reportsRoutes')
 const auth = require('./auth')
 const discordUsersRoutes = require('./discordUsersRoutes')
+const questionsRoutes = require('./questionsRoutes')
 
 module.exports = function (app, db) {
   noteRoutes(app, db)
@@ -13,5 +14,6 @@ module.exports = function (app, db) {
   settingsRoutes(app, db)
   reportsRoutes(app, db)
   auth(app, db)
-  discordUsersRoutes(app, db)
+  discordUsersRoutes(app, db),
+  questionsRoutes(app, db)
 }
