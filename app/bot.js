@@ -35,7 +35,7 @@ const execNewSchedule = async (botSettings) => {
 module.exports = { execNewSchedule, clientStatus }
 
 /// /////LOGIN
-client.on('error: ', (error) => console.log(error))
+client.on('error', (error) => console.log(error))
 client.on('disconnect', () => {
   clientStatus.onlineStatus = false
   setInterval(() => {
