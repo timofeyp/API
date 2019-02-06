@@ -1,19 +1,7 @@
 const { botSettingsSchema } = require('../database/schemas/')
 const { execNewSchedule, clientStatus } = require('../bot.js')
 const passport = require('passport')
-
-const getToken = function (headers) {
-  if (headers && headers.authorization) {
-    const parted = headers.authorization.split(' ')
-    if (parted.length === 2) {
-      return parted[1]
-    } else {
-      return null
-    }
-  } else {
-    return null
-  }
-}
+const { getToken } = require('../utils/getToken')
 
 module.exports = function (app) {
   app.post('/api/set-settings-secure', async (req, res) => {
