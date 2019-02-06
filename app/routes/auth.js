@@ -37,7 +37,6 @@ module.exports = function (app) {
   })
 
   app.post('/api/login', function (req, res) {
-    console.log(req.body)
     User.findOne({
       username: req.body.username
     }, function (err, user) {

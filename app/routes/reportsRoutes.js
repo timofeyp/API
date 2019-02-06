@@ -44,7 +44,6 @@ module.exports = (app) => {
 
   app.post('/api/get-reports-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
     const token = getToken(req.headers)
-    console.log(req.body)
     let conditionsObj = await conditions(req.body)
     if (token) {
       reportListSchema.paginate({
@@ -53,7 +52,6 @@ module.exports = (app) => {
       , { page: req.body.page, limit: req.body.limit, populate: 'author', sort: { created: -1 } })
         .then(reports => {
             res.json(reports)
-            console.log(reports)
         })
         .catch(err => res.status(400).send({ message: 'failed', err }))
     } else {

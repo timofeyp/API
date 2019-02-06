@@ -4,7 +4,6 @@ const passport = require('passport')
 
 module.exports = function (app) {
   app.post('/api/set-questions-secure', async (req, res) => {
-    console.log(req.body)
     let update = {
       num: req.body.num,
       text: req.body.text
@@ -19,7 +18,6 @@ module.exports = function (app) {
   })
 
   app.get('/api/get-questions-secure', passport.authenticate('jwt', { session: false }), (req, res) => {
-    console.log(getToken)
     const token = getToken(req.headers)
     if (token) {
       questionsListSchema.find({}, (err, questions) => {

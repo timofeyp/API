@@ -21,12 +21,11 @@ const connectBot = async () => {
 }
 
 const execNewSchedule = async (botSettings) => {
-  console.log(botSettings)
   client.login(botSettings.token)
     .then(() => {
       clientStatus.onlineStatus = true
     })
-    .catch()
+    .catch(console.error)
 
   schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
     let arr = await DiscordUserListSchema.find({ subscribe: true })

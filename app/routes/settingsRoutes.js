@@ -17,7 +17,6 @@ const getToken = function (headers) {
 
 module.exports = function (app) {
   app.post('/api/set-settings-secure', async (req, res) => {
-    console.log(req.body)
     let update = {
       [req.body.pollHours || req.body.pollHours === 0 ? 'pollHours' : null]: parseInt(req.body.pollHours),
       [req.body.pollMinutes || req.body.pollMinutes === 0 ? 'pollMinutes' : null]: parseInt(req.body.pollMinutes),
@@ -50,7 +49,6 @@ module.exports = function (app) {
   })
 
   app.get('/api/get-status-secure', passport.authenticate('jwt', { session: false }), function (req, res) {
-    console.log(clientStatus)
     const token = getToken(req.headers)
     if (token) {
       res.send(clientStatus)
