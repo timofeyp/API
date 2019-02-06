@@ -4,13 +4,13 @@ require('../config/passport/passport')(passport)
 const conditions = (conditions) => new Promise((resolve) => {
   resolve(conditions.authors ? {
     author: conditions.authors,
-    reports: { $ne: null },
+   reports: { $ne: null },
     created: {
       $gte: conditions.startDate,
       $lt: conditions.endDate
     }
   } : {
-    reports: { $ne: null },
+   reports: { $ne: null },
     created: {
       $gte: conditions.startDate,
       $lt: conditions.endDate
@@ -51,7 +51,10 @@ module.exports = (app) => {
         ...conditionsObj
       }
       , { page: req.body.page, limit: req.body.limit, populate: 'author', sort: { created: -1 } })
-        .then(reports => res.json(reports))
+        .then(reports => {
+            res.json(reports)
+            console.log(reports)
+        })
         .catch(err => res.status(400).send({ message: 'failed', err }))
     } else {
       return res.status(403).send({ success: false, msg: 'Unauthorized.' })
