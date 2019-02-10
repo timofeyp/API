@@ -1,5 +1,5 @@
-const { getToken } = require('../utils/getToken')
-const { questionsListSchema } = require('../database/schemas/')
+const { getToken } = require('$utils/getToken')
+const { questionsListSchema } = require('$database/schemas/')
 const passport = require('passport')
 
 module.exports = function (app) {
@@ -17,18 +17,12 @@ module.exports = function (app) {
     })
   })
 
-  app.get('/api/get-questions-secure', passport.authenticate('jwt', { session: false }), (req, res) => {
-    const token = getToken(req.headers)
-    if (token) {
-      questionsListSchema.find({}, (err, questions) => {
-        if (err) {
-          res.status(400).send({ message: 'Failed', err })
-        } else {
-          res.json(questions)
-        }
-      })
-    } else {
-      return res.status(403).send({ success: false, msg: 'Unauthorized.' })
+  app.get('/api/get-questions-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    const questions = await questionsListSchema.find({})
+    try {
+      res.json(questions)
+    } catch (err) {
+      res.status(400).send({ message: 'Failed', err })
     }
   })
 }

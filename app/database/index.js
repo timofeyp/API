@@ -1,4 +1,4 @@
-const dbUrl = require('../config/db')
+const dbUrl = require('$config/db')
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
 

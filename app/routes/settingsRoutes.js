@@ -1,7 +1,7 @@
-const { botSettingsSchema } = require('../database/schemas/')
-const { execNewSchedule, clientStatus } = require('../bot.js')
+const { botSettingsSchema } = require('$database/schemas/')
+const { execNewSchedule, clientStatus } = require('$app/bot.js')
 const passport = require('passport')
-const { getToken } = require('../utils/getToken')
+const { getToken } = require('$utils/getToken')
 
 module.exports = function (app) {
   app.post('/api/set-settings-secure', async (req, res) => {

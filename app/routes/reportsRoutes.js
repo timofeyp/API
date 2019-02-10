@@ -1,7 +1,7 @@
-const { reportListSchema } = require('../database/schemas/')
+const { reportListSchema } = require('$database/schemas/')
 const passport = require('passport')
-require('../config/passport/passport')(passport)
-const { getToken } = require('../utils/getToken')
+require('$passport/passport')(passport)
+const { getToken } = require('$utils/getToken')
 
 const conditions = (conditions) => new Promise((resolve) => {
   resolve(conditions.authors ? {

@@ -1,5 +1,5 @@
-const { botSettingsSchema, AdminUserList } = require('../database/schemas/')
-const  botAuth  = require('./bot.json')
+const { botSettingsSchema, AdminUserList } = require('../database/schemas')
+const  botAuth  = require('../config/bot.json')
 
 const initializeAuth = async () => {
   const authData = await AdminUserList.findOne()

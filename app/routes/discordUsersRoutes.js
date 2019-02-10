@@ -1,19 +1,7 @@
-const { DiscordUserListSchema } = require('../database/schemas/')
-var passport = require('passport')
-require('../config/passport/passport')(passport)
-
-const getToken = function (headers) {
-  if (headers && headers.authorization) {
-    const parted = headers.authorization.split(' ')
-    if (parted.length === 2) {
-      return parted[1]
-    } else {
-      return null
-    }
-  } else {
-    return null
-  }
-}
+const { DiscordUserListSchema } = require('$database/schemas/')
+const passport = require('passport')
+require('$passport/passport')(passport)
+const { getToken } = require('$utils/getToken')
 
 module.exports = (app) => {
   app.get('/api/get-discord-users-secure', passport.authenticate('jwt', { session: false }), function (req, res) {

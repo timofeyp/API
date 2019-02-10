@@ -1,0 +1,6 @@
+$app = /app
+$config = /app/config
+$database = /app/database
+$passport = /app/passport
+$routes = /app/routes
+$utils = /app/utils

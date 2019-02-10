@@ -2,7 +2,7 @@ const JwtStrategy = require('passport-jwt').Strategy
 
 const ExtractJwt = require('passport-jwt').ExtractJwt
 
-const User = require('../../database/schemas/AdminUserList')
+const User = require('$database/schemas/AdminUserList')
 const settings = require('./settings')
 
 module.exports = (passport) => {

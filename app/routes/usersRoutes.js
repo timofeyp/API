@@ -1,4 +1,4 @@
-const { reportListSchema } = require('../database/schemas/')
+const { reportListSchema } = require('$database/schemas/')
 
 module.exports = function (app) {
   app.post('/add', (req, res) => {

@@ -1,8 +1,8 @@
 const passport = require('passport')
-const settings = require('../config/passport/settings')
-require('../config/passport/passport')(passport)
+const express = require('express')
+const router = express.Router({})
 const jwt = require('jsonwebtoken')
-const User = require('../database/schemas/AdminUserList')
+const User = require('$database/schemas/AdminUserList')
 
 const getToken = function (headers) {
   if (headers && headers.authorization) {
@@ -17,12 +17,14 @@ const getToken = function (headers) {
   }
 }
 
+module.exports = router
+
 module.exports = function (app) {
   app.post('/auth/register', function (req, res) {
     if (!req.body.username || !req.body.password) {
       res.json({ success: false, msg: 'Please pass username and password.' })
     } else {
-      var newUser = new User({
+      const newUser = new User({
         username: req.body.username,
         password: req.body.password
       })

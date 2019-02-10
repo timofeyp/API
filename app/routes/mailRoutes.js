@@ -1,4 +1,4 @@
-const { addressList } = require('../database/schemas/')
+const { addressList } = require('$database/schemas/')
 
 module.exports = function (app) {
   app.post('/add-mail', (req, res) => {

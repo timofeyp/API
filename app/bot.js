@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 const mongoose = require('mongoose')
 const moment = require('moment')
-const { getSettings, initializeAuth } = require('./config/bot.js')
+const { getSettings, initializeAuth } = require('./utils/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
 const { DiscordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
