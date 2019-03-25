@@ -18,21 +18,20 @@ const getToken = function (headers) {
   }
 }
 
-router.post('/register', function (req, res) {
+router.post('/register', async (req, res) => {
   if (!req.body.username || !req.body.password) {
-    res.json({ success: false, msg: 'Please pass username and password.' })
+    return res.json({ success: false, msg: 'Please pass username and password.' })
   } else {
     const newUser = new User({
       username: req.body.username,
       password: req.body.password
     })
-    // save the user
-    newUser.save(function (err) {
-      if (err) {
-        return res.json({ success: false, msg: 'Username already exists.' })
-      }
-      res.json({ success: true, msg: 'Successful created new user.' })
-    })
+    const user = await newUser.save
+    try {
+      return res.json({ success: true, msg: 'Successful created new user.', user })
+    } catch (err) {
+      return res.json({ success: false, msg: 'Username already exists.' })
+    }
   }
 })
 

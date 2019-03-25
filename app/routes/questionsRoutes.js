@@ -10,22 +10,13 @@ router.post('/set-questions-secure', async (req, res) => {
     num: req.body.num,
     text: req.body.text
   }
-  await questionsListSchema.updateOne({ num: req.body.num }, update, { upsert: true }, (err, questions) => {
-    if (err) {
-      res.status(400).send({ message: 'Failed', err })
-    } else {
-      res.send(questions)
-    }
-  })
+  const questions = await questionsListSchema.updateOne({ num: req.body.num }, update, { upsert: true })
+  return res.json(questions)
 })
 
 router.get('/get-questions-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
-  const questions = await questionsListSchema.find({})
-  try {
-    res.json(questions)
-  } catch (err) {
-    res.status(400).send({ message: 'Failed', err })
-  }
+  const questions = await questionsListSchema.find({ a: 5 })
+  return res.json(questions)
 })
 
 module.exports = router
