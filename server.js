@@ -8,12 +8,9 @@ const morgan = require('morgan')
 const port = 8090
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(morgan('dev'))
 
 require('./app/routes')(app)
 app.listen(port, () => {
   console.log('We are live on ' + port)
 })
-
-app.use(morgan('dev'))
-
-module.exports = mongoose
