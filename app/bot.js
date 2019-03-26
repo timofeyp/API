@@ -95,7 +95,7 @@ const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
       let update = {
         $addToSet: { questionsDone: { questionNum: questionNum, done: true, date: new Date() } },
         author: userId,
-        created: new Date()
+        created: moment().utcOffset(0, true)
       }
       await reportListSchema.updateOne(conditions, update, { upsert: true })
     }
