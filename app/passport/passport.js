@@ -5,7 +5,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt
 const User = require('$database/schemas/AdminUserList')
 const settings = require('./settings')
 
-module.exports = (passport) => {
+module.exports = passport => {
   const opts = {}
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt')
   opts.secretOrKey = settings.secret

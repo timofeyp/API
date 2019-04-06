@@ -15,7 +15,7 @@ router.post('/set-questions-secure', async (req, res) => {
 })
 
 router.get('/get-questions-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
-  const questions = await questionsListSchema.find({ a: 5 })
+  const questions = await questionsListSchema.find({})
   return res.json(questions)
 })
 

@@ -5,12 +5,35 @@ const mongoose = require('./app/database')
 const bot = require('$app/bot')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
-const port = 8090
+const logger = require('$utils/log')(module)
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
+const User = require('$database/schemas/AdminUserList')
+const cookieParser = require('cookie-parser')
+const session = require('cookie-session')
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.use(new LocalStrategy(User.authenticate()))
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
+app.use(cookieParser())
+app.use(session({ keys: ['secretkey1', 'secretkey2'] }))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(morgan('dev'))
-
 require('./app/routes')(app)
-app.listen(port, () => {
-  console.log('We are live on ' + port)
+app.use((req, res, next) => {
+  const err = new Error('Not Found')
+  err.status = 404
+  next(err)
 })
+app.use((err, req, res, next) => {
+  logger.error(err)
+  res.status(err.status || 500)
+  res.send(err.message)
+})
+app.listen(8090)
