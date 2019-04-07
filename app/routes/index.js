@@ -3,4 +3,5 @@ module.exports = app => {
   app.use('/api/reports', require('./reportsRoutes'))
   app.use('/api/auth', require('./auth'))
   app.use('/api/questions', require('./questionsRoutes'))
+  app.use('/api/discord-users', require('./discordUsersRoutes'))
 }

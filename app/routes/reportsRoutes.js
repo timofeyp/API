@@ -3,6 +3,7 @@ const passport = require('passport')
 require('$passport/passport')(passport)
 const express = require('express')
 const asyncRouter = require('$utils/asyncRouter')
+const auth = require('$utils/auth')
 const router = asyncRouter(express.Router({}))
 
 const conditions = (conditions) => new Promise((resolve) => {
@@ -22,7 +23,7 @@ const conditions = (conditions) => new Promise((resolve) => {
   })
 })
 
-router.post('/get-reports-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.post('/get-reports-secure', auth, async (req, res) => {
   let conditionsObj = await conditions(req.body)
   const reports = await reportListSchema.paginate(
     conditionsObj,

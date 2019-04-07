@@ -1,10 +1,10 @@
 const { botSettingsSchema, AdminUserList } = require('../database/schemas')
-const  botAuth  = require('../config/bot.json')
+const botAuth  = require('../config/bot.json')
 
 const initializeAuth = async () => {
   const authData = await AdminUserList.findOne()
   if (!authData) {
-    var firstAdminUser = new AdminUserList({
+    const firstAdminUser = new AdminUserList({
       username: botAuth.sysLogin,
       password: botAuth.sysPass
     })

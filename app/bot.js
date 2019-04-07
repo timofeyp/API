@@ -4,7 +4,7 @@ const moment = require('moment')
 const { getSettings, initializeAuth } = require('./utils/bot.js')
 const Discord = require('discord.js')
 const schedule = require('node-schedule')
-const { DiscordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
+const { discordUserListSchema, reportListSchema, questionsListSchema } = require('./database/schemas')
 const client = new Discord.Client()
 const clientStatus = { onlineStatus: false }
 
@@ -20,7 +20,7 @@ const connectBot = async () => {
   initializeAuth()
 }
 
-const execNewSchedule = async (botSettings) => {
+const execNewSchedule = async botSettings => {
   client.login(botSettings.token)
     .then(() => {
       clientStatus.onlineStatus = true
@@ -28,14 +28,14 @@ const execNewSchedule = async (botSettings) => {
     .catch(console.error)
 
   schedule.scheduleJob(botSettings.pollMinutes.toString() + ' ' + botSettings.pollHours.toString() + ' ? * ' + botSettings.pollDaysOfWeek, async () => {
-    let arr = await DiscordUserListSchema.find({ subscribe: true })
+    let arr = await discordUserListSchema.find({ subscribe: true })
     processArray(arr)
   })
 }
 module.exports = { execNewSchedule, clientStatus }
 
 /// /////LOGIN
-client.on('error', (error) => console.log(error))
+client.on('error', error => console.log(error))
 client.on('disconnect', () => {
   clientStatus.onlineStatus = false
   setInterval(() => {
@@ -58,7 +58,7 @@ const todayCondition = () => {
 
 /// ////SCHEDULE JOB
 
-const pollUser = (user) => new Promise(async (resolve) => {
+const pollUser = async user => {
   let botSettings = await getSettings()
   let conditions = {
     ...todayCondition(botSettings),
@@ -66,11 +66,11 @@ const pollUser = (user) => new Promise(async (resolve) => {
   let reportList = await reportListSchema.findOne(conditions)
   let reportsCheckObj = await reportsCheck(reportList)
   if (reportsCheckObj.check) {
-    resolve(sendQuestion(user._id, user.discordId, (reportsCheckObj.maxReportDone + 1), reportList))
+    await sendQuestion(user._id, user.discordId, (reportsCheckObj.maxReportDone + 1), reportList)
   }
-})
+}
 
-const processArray = async (arr) => {
+const processArray = async arr => {
   for (const item of arr) {
     await pollUser(item)
   }
@@ -104,7 +104,7 @@ const sendQuestion = async (userId, discordUserId, questionNum, reportList) => {
   }
 }
 
-const questionsCheck = async (reportList) => {
+const questionsCheck = async reportList => {
   if (reportList) {
     let getQuestionsDone = () => {
       return reportList.questionsDone.map(q => {
@@ -129,7 +129,7 @@ const questionsCheck = async (reportList) => {
   }
 }
 
-const reportsCheck = async (reportList) => {
+const reportsCheck = async reportList => {
   if (reportList) {
     if (reportList.reports.length) {
       let getReportsDone = () => {
@@ -152,7 +152,7 @@ const reportsCheck = async (reportList) => {
   }
 }
 
-client.on('message', async (message) => {
+client.on('message', async message => {
   if (message.author.id !== client.user.id) {
     let userCondition = { discordId: message.author.id }
     switch (message.content) {
@@ -162,17 +162,17 @@ client.on('message', async (message) => {
           name: message.author.username,
           subscribe: true
         }
-        await DiscordUserListSchema.updateOne(userCondition, userAdd, { upsert: true })
+        await discordUserListSchema.updateOne(userCondition, userAdd, { upsert: true })
         break
       case '!stop':
-        await DiscordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
+        await discordUserListSchema.findOneAndUpdate(userCondition, { subscribe: false })
         break
       case 'srv':
-        let arr = await DiscordUserListSchema.find({ subscribe: true })
+        let arr = await discordUserListSchema.find({ subscribe: true })
         processArray(arr)
         break
       default:
-        let user = await DiscordUserListSchema.findOne({ discordId: message.author.id })
+        let user = await discordUserListSchema.findOne({ discordId: message.author.id })
         if (user.subscribe) {
           let conditions = {
             ...todayCondition(),

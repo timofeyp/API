@@ -1,11 +1,11 @@
 const { getToken } = require('$utils/getToken')
 const { questionsListSchema } = require('$database/schemas/')
-const passport = require('passport')
 const express = require('express')
 const asyncRouter = require('$utils/asyncRouter')
+const auth = require('$utils/auth')
 const router = asyncRouter(express.Router({}))
 
-router.post('/set-questions-secure', async (req, res) => {
+router.post('/set-questions-secure', auth, async (req, res) => {
   let update = {
     num: req.body.num,
     text: req.body.text
@@ -14,7 +14,7 @@ router.post('/set-questions-secure', async (req, res) => {
   return res.json(questions)
 })
 
-router.get('/get-questions-secure', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/get-questions-secure', auth, async (req, res) => {
   const questions = await questionsListSchema.find({})
   return res.json(questions)
 })

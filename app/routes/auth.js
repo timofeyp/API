@@ -8,7 +8,6 @@ const User = require('$database/schemas/AdminUserList')
 const getToken = require('$utils/getToken')
 const HttpStatus = require('http-status-codes')
 
-
 router.post('/register', async (req, res) => {
   if (!req.body.username || !req.body.password) {
     return res.json({ success: false, msg: 'Please pass username and password.' })
@@ -26,16 +25,7 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.redirect('/')
-})
-
-router.post('/login-by-jwt', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const token = getToken(req.headers)
-  if (token) {
-    res.json({ success: true, token: 'JWT ' + token })
-  } else {
-    return res.status(403).send({ success: false, msg: 'Unauthorized' })
-  }
+  res.sendStatus(HttpStatus.OK)
 })
 
 module.exports = router
