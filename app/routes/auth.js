@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.sendStatus(HttpStatus.OK)
+  res.status(HttpStatus.OK).send({ user: req.user })
 })
 
 router.post('/session-login', auth, (req, res) => {
