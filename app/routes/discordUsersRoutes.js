@@ -8,7 +8,6 @@ const router = asyncRouter(express.Router({}))
 
 router.get('/get-discord-users-secure', auth, async (req, res) => {
   const list = await discordUserListSchema.find({}, ['name', 'subscribe'])
-  console.log(list)
   return res.json(list)
 })
 

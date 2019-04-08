@@ -3,6 +3,7 @@ const express = require('express')
 const router = express.Router({})
 const User = require('$database/schemas/AdminUserList')
 const HttpStatus = require('http-status-codes')
+const auth = require('$utils/auth')
 
 router.post('/register', async (req, res) => {
   if (!req.body.username || !req.body.password) {
@@ -20,8 +21,12 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.post('/login', passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
+router.post('/login', passport.authenticate('local'), (req, res) => {
   res.sendStatus(HttpStatus.OK)
+})
+
+router.post('/session-login', auth, (req, res) => {
+  res.status(HttpStatus.OK).send({ user: req.user })
 })
 
 module.exports = router
