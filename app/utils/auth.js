@@ -4,6 +4,8 @@ module.exports = (req, res, next) => {
   if (req.user) {
     next()
   } else {
-    return res.sendStatus(HttpStatus.UNAUTHORIZED)
+    return res.status(HttpStatus.UNAUTHORIZED).send({
+      error: HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED)
+    })
   }
 }
