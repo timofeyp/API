@@ -32,7 +32,7 @@ router.post('/get-reports-secure', auth, async (req, res) => {
       populate: 'author',
       sort: { created: -1 }
     })
-  res.json(reports)
+  return res.json(reports)
 })
 
 module.exports = router

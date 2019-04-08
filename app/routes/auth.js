@@ -1,11 +1,7 @@
 const passport = require('passport')
 const express = require('express')
-const status = require('http-status')
 const router = express.Router({})
-const settings = require('$passport/settings')
-const jwt = require('jsonwebtoken')
 const User = require('$database/schemas/AdminUserList')
-const getToken = require('$utils/getToken')
 const HttpStatus = require('http-status-codes')
 
 router.post('/register', async (req, res) => {
@@ -24,7 +20,7 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
   res.sendStatus(HttpStatus.OK)
 })
 

@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const logger = require('$utils/log')(module)
 const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
 const User = require('$database/schemas/AdminUserList')
 const cookieParser = require('cookie-parser')
 const session = require('cookie-session')
